@@ -60,43 +60,47 @@ rules:
       - action: action_trip_recommendation
 
   # ---- Two-stage fallback (Task 4 requirement) ----
-  # Stage 1: a single low-confidence message triggers a plain re-prompt.
-  # Stage 2 (consecutive fallback) is handled inside action_default_fallback,
-  # which offers constrained quick-reply buttons and then escalates to a human.
   - rule: Default fallback on low NLU confidence
     steps:
       - intent: nlu_fallback
       - action: action_default_fallback
+
   - rule: Handle weather query
     steps:
-    - intent: ask_weather
-    - action: action_get_weather
+      - intent: ask_weather
+      - action: action_get_weather
+
   - rule: Handle destination query
     steps:
-    - intent: ask_destination
-    - action: action_ask_destination
+      - intent: ask_destination
+      - action: action_ask_destination
 
   - rule: Handle hotel query
     steps:
-    - intent: ask_hotels
-    - action: action_ask_destination
+      - intent: ask_hotels
+      - action: action_ask_destination
 
   - rule: Handle cultural query
     steps:
-    - intent: ask_cultural
-    - action: action_ask_destination
+      - intent: ask_cultural
+      - action: action_ask_destination
 
   - rule: Handle transport query
     steps:
-    - intent: ask_transport
-    - action: action_ask_destination
+      - intent: ask_transport
+      - action: action_ask_destination
 
   - rule: Handle offset query
     steps:
-    - intent: ask_offset
-    - action: action_ask_destination
+      - intent: ask_offset
+      - action: action_ask_destination
 
   - rule: Handle eco tips query
     steps:
-    - intent: ask_eco_tips
-    - action: action_ask_destination
+      - intent: ask_eco_tips
+      - action: action_ask_destination
+
+  - rule: Handle provide trip details
+    steps:
+      - intent: provide_trip_details
+      - action: action_trip_recommendation
