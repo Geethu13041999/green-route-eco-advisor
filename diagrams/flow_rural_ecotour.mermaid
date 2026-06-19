@@ -1,0 +1,17 @@
+%% Scenario 2 - Eco-tour in a rural area (Task 3)
+flowchart TD
+    A([User: "I want a rural eco-tour in Costa Rica"]) --> B[NLU extracts destination = Costa Rica]
+    B --> C[trip_intake_form fills remaining slots]
+    C --> D[Action queries curated DB for Costa Rica]
+    D --> E{Live Amadeus keys set?}
+    E -->|yes| F[Confirm live hotel availability]
+    E -->|no| G[Use curated eco-data only]
+    F --> H[Rank Rainforest Alliance / CST stays]
+    G --> H
+    H --> I[Surface community-led cultural experiences]
+    I --> J[Recommend shared shuttle over domestic flight]
+    J --> K{User asks carbon footprint?}
+    K -->|yes| L[Climatiq estimate + offset programme]
+    K -->|no| M[Offer human advisor for tailored itinerary]
+    L --> M
+    M --> N([End])

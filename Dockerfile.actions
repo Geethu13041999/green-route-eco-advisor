@@ -1,0 +1,13 @@
+# Action server container (Task 6: Deployment)
+FROM rasa/rasa-sdk:3.6.2
+
+WORKDIR /app
+COPY requirements-actions.txt ./
+USER root
+RUN pip install --no-cache-dir -r requirements-actions.txt
+COPY ./actions /app/actions
+COPY ./data/mock_db.json /app/data/mock_db.json
+USER 1001
+
+EXPOSE 5055
+CMD ["start", "--actions", "actions.actions"]

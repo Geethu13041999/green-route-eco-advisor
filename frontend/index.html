@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GREEN ROUTE Eco-Travel Advisor</title>
+<style>
+  :root{
+    --green:#2e9e5b; --amber:#e6962b; --red:#d64545;
+    --bg:#eef2ef; --bot:#ffffff; --user:#2e9e5b; --ink:#1f2d27; --muted:#6b7c74;
+  }
+  *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--ink)}
+  .app{max-width:520px;margin:0 auto;height:100vh;display:flex;flex-direction:column;background:var(--bg)}
+
+  /* ── Header ── */
+  header{
+    background:linear-gradient(135deg,#1f7a45,#2e9e5b,#4cba77);
+    color:#fff;padding:18px 22px;
+    display:flex;align-items:center;gap:14px;
+    box-shadow:0 2px 10px rgba(0,0,0,.15);
+  }
+  .header-icon{
+    width:44px;height:44px;background:rgba(255,255,255,.2);
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:22px;flex-shrink:0;
+  }
+  header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.3px}
+  header .sub{font-size:12px;opacity:.85;margin-top:3px;font-weight:400}
+  .header-dot{
+    margin-left:auto;display:flex;align-items:center;gap:6px;
+    font-size:12px;opacity:.9;
+  }
+  .header-dot::before{
+    content:"";width:8px;height:8px;background:#7effa0;
+    border-radius:50%;box-shadow:0 0 0 2px rgba(126,255,160,.35);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+  #handover-banner{display:none;background:#fff4e0;color:#8a5a00;
+    border-left:4px solid var(--amber);padding:10px 16px;font-size:13px;font-weight:500}
+
+  /* ── Messages ── */
+  #messages{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:12px}
+  #messages::-webkit-scrollbar{width:5px}
+  #messages::-webkit-scrollbar-thumb{background:#c5d4cb;border-radius:10px}
+
+  /* ── Bubbles ── */
+  .bubble-row{display:flex;align-items:flex-end;gap:8px}
+  .bubble-row.user{flex-direction:row-reverse}
+  .avatar{
+    width:32px;height:32px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;flex-shrink:0;
+  }
+  .avatar.bot{background:linear-gradient(135deg,#2e9e5b,#1f7a45);color:#fff}
+  .avatar.user{background:linear-gradient(135deg,#4cba77,#2e9e5b);color:#fff}
+
+  .bubble{
+    max-width:78%;padding:12px 16px;font-size:14px;line-height:1.55;
+    white-space:pre-wrap;word-wrap:break-word;
+    box-shadow:0 2px 8px rgba(0,0,0,.07);
+  }
+  .bubble.bot{
+    background:#fff;color:var(--ink);
+    border-radius:20px 20px 20px 4px;
+    border:1px solid #dde8e2;
+  }
+  .bubble.user{
+    background:linear-gradient(135deg,#2e9e5b,#1f7a45);
+    color:#fff;
+    border-radius:20px 20px 4px 20px;
+  }
+
+  /* ── Typing indicator ── */
+  .typing-row{display:flex;align-items:flex-end;gap:8px}
+  .typing-bubble{
+    background:#fff;border:1px solid #dde8e2;
+    border-radius:20px 20px 20px 4px;
+    padding:14px 18px;
+    box-shadow:0 2px 8px rgba(0,0,0,.07);
+    display:flex;gap:5px;align-items:center;
+  }
+  .typing-bubble span{
+    width:8px;height:8px;background:#b0c4b9;
+    border-radius:50%;display:inline-block;
+    animation:bounce 1.2s infinite;
+  }
+  .typing-bubble span:nth-child(2){animation-delay:.2s}
+  .typing-bubble span:nth-child(3){animation-delay:.4s}
+  @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+
+  /* ── Hotel carousel ── */
+  .carousel-wrap{position:relative;align-self:flex-start;width:100%;max-width:100%}
+  .carousel{display:flex;gap:10px;overflow-x:auto;padding:6px 34px 12px;
+    scroll-snap-type:x mandatory;scroll-behavior:smooth}
+  .carousel::-webkit-scrollbar{height:6px}
+  .carousel::-webkit-scrollbar-thumb{background:#bcccc3;border-radius:4px}
+  .carousel .card{flex:0 0 210px;min-width:210px;scroll-snap-align:start;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);transition:transform .2s}
+  .carousel .card:hover{transform:translateY(-2px)}
+  .carousel-nav{position:absolute;top:46%;transform:translateY(-50%);background:#fff;
+    border:1px solid #d3ddd7;border-radius:50%;width:32px;height:32px;cursor:pointer;
+    font-size:18px;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,.15);z-index:2;transition:.15s}
+  .carousel-nav:hover{background:var(--green);color:#fff}
+  .carousel-nav.left{left:0} .carousel-nav.right{right:0}
+  .carousel-label{align-self:flex-start;font-size:12px;color:var(--muted);margin:2px 0 -2px}
+
+  /* ── Cards ── */
+  .card{background:#fff;border-radius:14px;padding:14px 16px;
+    border:1px solid #e3e9e5;border-left:6px solid #ccc}
+  .card.green{border-left-color:var(--green)}
+  .card.amber{border-left-color:var(--amber)}
+  .card.red{border-left-color:var(--red)}
+  .card .name{font-weight:700;font-size:14px}
+  .card .meta{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}
+  .badge{display:inline-block;padding:3px 10px;border-radius:12px;
+    font-size:11px;font-weight:700;color:#fff;margin-top:8px;letter-spacing:.4px}
+  .badge.green{background:var(--green)} .badge.amber{background:var(--amber)} .badge.red{background:var(--red)}
+  .book{display:inline-block;margin-top:10px;font-size:12px;font-weight:700;color:#fff;
+    background:linear-gradient(135deg,#2e9e5b,#1f7a45);
+    padding:6px 14px;border-radius:16px;text-decoration:none;transition:.15s}
+  .book:hover{opacity:.88;transform:scale(1.02)}
+
+  /* ── Alert ── */
+  .alert{align-self:flex-start;max-width:88%;background:#fdeaea;color:#a12d2d;
+    border:1px solid #f3c6c6;border-left:5px solid var(--red);
+    border-radius:12px;padding:10px 14px;font-size:13px;font-weight:500}
+
+  /* ── Carbon compare ── */
+  .compare{align-self:flex-start;background:#fff;border-radius:14px;padding:14px 16px;
+    border:1px solid #e3e9e5;width:92%;max-width:92%;
+    box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .compare h4{margin:0 0 10px;font-size:13px;color:var(--ink)}
+  .compare .row{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:12px}
+  .compare .label{width:64px;text-transform:capitalize;color:var(--muted)}
+  .compare .track{flex:1;background:#f0f4f2;border-radius:6px;overflow:hidden;height:18px}
+  .compare .fill{height:100%;border-radius:6px;transition:width .6s ease}
+  .compare .fill.green{background:var(--green)} .compare .fill.amber{background:var(--amber)} .compare .fill.red{background:var(--red)}
+  .compare .val{width:74px;text-align:right;color:var(--ink);font-weight:600}
+
+  /* ── Carbon card ── */
+  .carbon{align-self:flex-start;background:#fff;border-radius:14px;padding:14px 16px;
+    border:1px solid #e3e9e5;max-width:82%;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .carbon .big{font-size:22px;font-weight:800;margin:4px 0}
+
+  /* ── Quick replies ── */
+  .quick{display:flex;flex-wrap:wrap;gap:8px;align-self:flex-start;margin-top:2px}
+  .quick button{
+    background:#fff;border:1.5px solid var(--green);color:var(--green);
+    border-radius:20px;padding:8px 16px;font-size:13px;font-weight:600;
+    cursor:pointer;transition:.15s;box-shadow:0 1px 4px rgba(0,0,0,.06)
+  }
+  .quick button:hover{background:var(--green);color:#fff;transform:translateY(-1px)}
+
+  /* ── Footer / input ── */
+  footer{
+    display:flex;gap:10px;padding:14px 16px;
+    background:#fff;border-top:1px solid #e3e9e5;
+    box-shadow:0 -2px 8px rgba(0,0,0,.05);
+  }
+  #input{
+    flex:1;border:1.5px solid #d3ddd7;border-radius:24px;
+    padding:12px 18px;font-size:14px;outline:none;
+    transition:border .2s;background:#f9fbfa;
+  }
+  #input:focus{border-color:var(--green);background:#fff}
+  #send{
+    background:linear-gradient(135deg,#2e9e5b,#1f7a45);
+    color:#fff;border:none;border-radius:24px;
+    padding:0 22px;font-size:14px;font-weight:700;
+    cursor:pointer;transition:.15s;
+    box-shadow:0 2px 6px rgba(46,158,91,.35);
+  }
+  #send:hover{opacity:.9;transform:translateY(-1px)}
+  #send:active{transform:translateY(0)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="header-icon">🌿</div>
+    <div>
+      <h1>GREEN ROUTE ECO TRAVEL</h1>
+      <div class="sub">Your Sustainable tourism planning assistant</div>
+    </div>
+    <div class="header-dot">Online</div>
+  </header>
+
+  <div id="handover-banner">🤝 This conversation has been escalated to a human travel specialist.</div>
+  <div id="messages" role="log" aria-live="polite" aria-label="Chat conversation"></div>
+
+  <footer>
+    <input id="input" placeholder="Type a message…" autocomplete="off" />
+    <button id="send">Send</button>
+  </footer>
+</div>
+
+<script>
+const RASA_URL = "http://localhost:5005/webhooks/rest/webhook";
+const SENDER = "web-user-" + Math.random().toString(36).slice(2, 8);
+const messagesEl = document.getElementById("messages");
+const inputEl = document.getElementById("input");
+const bandEmoji = {green:"🟢", amber:"🟠", red:"🔴"};
+
+function scrollDown(){ messagesEl.scrollTop = messagesEl.scrollHeight; }
+
+function addBubble(text, who){
+  const row = document.createElement("div");
+  row.className = "bubble-row " + who;
+  const avatar = document.createElement("div");
+  avatar.className = "avatar " + who;
+  avatar.textContent = who === "bot" ? "🌿" : "👤";
+  const bubble = document.createElement("div");
+  bubble.className = "bubble " + who;
+  bubble.textContent = text;
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+  messagesEl.appendChild(row);
+  scrollDown();
+}
+
+function addTyping(){
+  const row = document.createElement("div");
+  row.className = "typing-row";
+  const avatar = document.createElement("div");
+  avatar.className = "avatar bot";
+  avatar.textContent = "🌿";
+  const bub = document.createElement("div");
+  bub.className = "typing-bubble";
+  bub.innerHTML = "<span></span><span></span><span></span>";
+  row.appendChild(avatar);
+  row.appendChild(bub);
+  messagesEl.appendChild(row);
+  scrollDown();
+  return row;
+}
+
+function addQuickReplies(buttons){
+  const wrap = document.createElement("div");
+  wrap.className = "quick";
+  buttons.forEach(b=>{
+    const btn = document.createElement("button");
+    btn.textContent = b.title;
+    btn.onclick = ()=>{ wrap.remove(); send(b.payload, b.title); };
+    wrap.appendChild(btn);
+  });
+  messagesEl.appendChild(wrap); scrollDown();
+}
+
+function addAlert(text){
+  const a = document.createElement("div");
+  a.className = "alert";
+  a.setAttribute("role","alert");
+  a.textContent = "⚠️ " + text;
+  messagesEl.appendChild(a); scrollDown();
+}
+
+function addHotelCards(payload){
+  const label = document.createElement("div");
+  label.className = "carousel-label";
+  label.textContent = "Use ‹ › or swipe to compare eco-stays";
+  messagesEl.appendChild(label);
+  const wrap = document.createElement("div");
+  wrap.className = "carousel-wrap";
+  const row = document.createElement("div");
+  row.className = "carousel";
+  payload.cards.forEach(c=>{
+    const card = document.createElement("div");
+    card.className = "card " + c.band;
+    const book = c.booking_url ? `<a class="book" href="${c.booking_url}" target="_blank" rel="noopener">Book →</a>` : "";
+    card.innerHTML =
+      `<div class="name">${bandEmoji[c.band]||""} ${c.name}</div>`+
+      `<div class="meta">${c.certification}<br>€${c.price_per_night_eur}/night · ${c.carbon_per_night_kg} kg CO₂e/night</div>`+
+      `<span class="badge ${c.band}">${c.band.toUpperCase()} CARBON</span>`+book;
+    row.appendChild(card);
+  });
+  const leftBtn = document.createElement("button");
+  leftBtn.className = "carousel-nav left"; leftBtn.textContent = "‹";
+  leftBtn.onclick = ()=> row.scrollBy({left:-230, behavior:"smooth"});
+  const rightBtn = document.createElement("button");
+  rightBtn.className = "carousel-nav right"; rightBtn.textContent = "›";
+  rightBtn.onclick = ()=> row.scrollBy({left:230, behavior:"smooth"});
+  wrap.appendChild(leftBtn); wrap.appendChild(row); wrap.appendChild(rightBtn);
+  messagesEl.appendChild(wrap); scrollDown();
+  const highEmission = payload.cards.filter(c=> c.band === "red");
+  if(highEmission.length) addAlert(`${highEmission.map(h=>h.name).join(", ")} ${highEmission.length>1?"are":"is"} a high-emission option — consider a greener stay or a carbon offset.`);
+}
+
+function addCarbonCard(p){
+  const d = document.createElement("div");
+  d.className = "carbon";
+  d.innerHTML =
+    `<div>${bandEmoji[p.band]} Carbon footprint · ${p.transport_mode}, ~${p.distance_km} km</div>`+
+    `<div class="big" style="color:var(--${p.band})">${p.co2e_kg} kg CO₂e</div>`+
+    `<div style="font-size:12px;color:var(--muted)">Source: ${p.source}</div>`;
+  messagesEl.appendChild(d); scrollDown();
+  if(p.band==="red") addAlert(`This is a high-emission travel option (${p.co2e_kg} kg CO₂e). Consider rail or offsetting the journey.`);
+}
+
+function addCarbonCompare(p){
+  const max = Math.max(...p.modes.map(m=>m.co2e_kg), 1);
+  const wrap = document.createElement("div");
+  wrap.className = "compare";
+  let rows = `<h4>Carbon by transport mode (~${Math.round(p.distance_km)} km)</h4>`;
+  p.modes.forEach(m=>{
+    const pct = Math.max((m.co2e_kg/max)*100, 2);
+    rows += `<div class="row"><span class="label">${m.mode}</span>`+
+            `<span class="track"><span class="fill ${m.band}" style="width:${pct}%"></span></span>`+
+            `<span class="val">${m.co2e_kg} kg</span></div>`;
+  });
+  wrap.innerHTML = rows;
+  messagesEl.appendChild(wrap); scrollDown();
+}
+
+function addFlightCard(p){
+  const wrap = document.createElement("div");
+  wrap.className = "carbon";
+  const detail = p.price ? `from €${p.price}${p.airline?" · "+p.airline:""}${p.depart?" · dep "+p.depart:""}` : "live fares available";
+  wrap.innerHTML =
+    `<div>✈️ Flight ${p.origin} → ${p.destination}</div>`+
+    `<div class="big" style="color:var(--green)">${p.price?"€"+p.price:"Search fares"}</div>`+
+    `<div style="font-size:12px;color:var(--muted)">${detail}</div>`+
+    (p.booking_url?`<a class="book" href="${p.booking_url}" target="_blank" rel="noopener">Book flight →</a>`:"");
+  messagesEl.appendChild(wrap); scrollDown();
+}
+
+function handleCustom(custom){
+  if(!custom||!custom.type) return;
+  if(custom.type==="hotel_cards") addHotelCards(custom);
+  else if(custom.type==="carbon_card") addCarbonCard(custom);
+  else if(custom.type==="carbon_compare") addCarbonCompare(custom);
+  else if(custom.type==="flight_card") addFlightCard(custom);
+  else if(custom.type==="handover") document.getElementById("handover-banner").style.display="block";
+}
+
+function renderMarkdown(text) {
+    return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
+}
+ 
+async function send(message, displayText){
+  if(!message) return;
+  addBubble(displayText||message, "user");
+  inputEl.value = "";
+  const typingEl = addTyping();
+  try{
+    const res = await fetch(RASA_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({sender:SENDER,message})});
+    const data = await res.json();
+    typingEl.remove();
+    data.forEach(item=>{
+      if(item.text) addBubble(item.text,"bot");
+      if(item.custom) handleCustom(item.custom);
+      if(item.buttons&&item.buttons.length) addQuickReplies(item.buttons);
+    });
+  }catch(err){
+    typingEl.remove();
+    addBubble("⚠️ Couldn't reach the bot. Make sure `rasa run --enable-api --cors \"*\"` and the action server are running.","bot");
+  }
+}
+
+document.getElementById("send").onclick = ()=> send(inputEl.value.trim());
+inputEl.addEventListener("keydown", e=>{ if(e.key==="Enter") send(inputEl.value.trim()); });
+window.addEventListener("load", ()=> setTimeout(()=> send("hi"), 400));
+</script>
+</body>
+</html>

@@ -1,0 +1,334 @@
+version: "3.1"
+
+nlu:
+
+- intent: greet
+  examples: |
+    - hi
+    - hello
+    - hey
+    - good morning
+    - good evening
+    - hi there
+    - hello there
+    - hey there
+    - howdy
+    - what's up
+    - greetings
+
+- intent: goodbye
+  examples: |
+    - bye
+    - goodbye
+    - see you
+    - see you later
+    - take care
+    - thanks bye
+    - that's all
+    - I'm done
+    - quit
+    - exit
+
+- intent: affirm
+  examples: |
+    - yes
+    - yeah
+    - yep
+    - sure
+    - of course
+    - definitely
+    - ok
+    - okay
+    - sounds good
+    - please do
+
+- intent: deny
+  examples: |
+    - no
+    - nope
+    - not really
+    - no thanks
+    - I don't think so
+    - nah
+
+- intent: ask_destination
+  examples: |
+    - I want to go to [Kerala](destination)
+    - tell me about [Bali](destination)
+    - I'm interested in [Reykjavik](destination)
+    - show me [New Zealand](destination)
+    - explore [Lisbon](destination)
+    - I want to visit [Copenhagen](destination)
+    - what about [Kyoto](destination)
+    - take me to [Costa Rica](destination)
+    - I'd like to visit [Barcelona](destination)
+    - tell me about [Amsterdam](destination)
+    - I'm planning a trip to [Rome](destination)
+    - show me options for [Bangkok](destination)
+    - I want to explore [Vienna](destination)
+    - information about [Vancouver](destination)
+    - tell me about [Stockholm](destination)
+    - I'm interested in [Cape Town](destination)
+    - [Kerala](destination)
+    - [Bali](destination)
+    - [Reykjavik](destination)
+    - [New Zealand](destination)
+    - [Lisbon](destination)
+    - [Copenhagen](destination)
+    - [Kyoto](destination)
+    - [Costa Rica](destination)
+    - [Barcelona](destination)
+    - [Amsterdam](destination)
+    - [Rome](destination)
+    - [Bangkok](destination)
+    - [Vienna](destination)
+    - [Vancouver](destination)
+    - [Stockholm](destination)
+    - [Cape Town](destination)
+
+- intent: ask_weather
+  examples: |
+    - what is the weather in [Kerala](destination)
+    - weather in [Bali](destination)
+    - what's the weather like in [Reykjavik](destination)
+    - best time to visit [New Zealand](destination)
+    - when should I go to [Lisbon](destination)
+    - what is the climate in [Copenhagen](destination)
+    - weather forecast for [Kyoto](destination)
+    - what months are best for [Costa Rica](destination)
+    - climate in [Barcelona](destination)
+    - when is the best time to visit [Amsterdam](destination)
+    - weather in [Rome](destination)
+    - what is the temperature in [Bangkok](destination)
+    - climate of [Vienna](destination)
+    - best season to visit [Vancouver](destination)
+    - weather conditions in [Stockholm](destination)
+    - when to visit [Cape Town](destination)
+    - what is the best time to go to [Kerala](destination)
+    - avoid which months in [Bali](destination)
+    - peak season in [Reykjavik](destination)
+    - typical temperature in [New Zealand](destination)
+    - is [Lisbon](destination) good in summer
+    - rainy season in [Costa Rica](destination)
+    - how hot is [Bangkok](destination)
+    - snow in [Vienna](destination)
+    - summer in [Stockholm](destination)
+    - winter in [Cape Town](destination)
+    - seasonal info for [Kyoto](destination)
+    - travel seasons for [Barcelona](destination)
+    - climate guide for [Amsterdam](destination)
+    - best months to travel to [Rome](destination)
+    - when is peak season in [Vancouver](destination)
+    - what season is good for [Copenhagen](destination)
+
+- intent: ask_hotels
+  examples: |
+    - recommend a hotel in [Kerala](destination)
+    - eco hotels in [Bali](destination)
+    - where should I stay in [Reykjavik](destination)
+    - sustainable accommodation in [New Zealand](destination)
+    - green hotels in [Lisbon](destination)
+    - best eco stay in [Copenhagen](destination)
+    - where to stay in [Kyoto](destination)
+    - accommodation in [Costa Rica](destination)
+    - hotels in [Barcelona](destination)
+    - eco lodges in [Amsterdam](destination)
+    - sustainable hotels in [Rome](destination)
+    - green guesthouses in [Bangkok](destination)
+    - where can I stay in [Vienna](destination)
+    - hotels in [Vancouver](destination)
+    - accommodation options in [Stockholm](destination)
+    - where to sleep in [Cape Town](destination)
+    - certified eco hotel in [Kerala](destination)
+    - budget hotel in [Bali](destination)
+    - luxury eco resort in [New Zealand](destination)
+    - cheap stay in [Lisbon](destination)
+    - show me hotels in [Copenhagen](destination)
+    - give me accommodation options for [Kyoto](destination)
+    - suggest a place to stay in [Costa Rica](destination)
+    - I need a hotel in [Barcelona](destination)
+    - find me an eco lodge in [Amsterdam](destination)
+    - rainforest lodge in [Costa Rica](destination)
+    - ryokan in [Kyoto](destination)
+    - geothermal hotel in [Reykjavik](destination)
+    - hostel in [Rome](destination)
+    - boutique hotel in [Vienna](destination)
+
+- intent: ask_cultural
+  examples: |
+    - what are the activities in [Kerala](destination)
+    - activities in [Bali](destination)
+    - things to do in [Reykjavik](destination)
+    - cultural experiences in [New Zealand](destination)
+    - what should I do in [Lisbon](destination)
+    - activities in [Copenhagen](destination)
+    - things to see in [Kyoto](destination)
+    - eco activities in [Costa Rica](destination)
+    - what to do in [Barcelona](destination)
+    - cultural things in [Amsterdam](destination)
+    - what can I do in [Rome](destination)
+    - activities in [Bangkok](destination)
+    - what to experience in [Vienna](destination)
+    - things to do in [Vancouver](destination)
+    - cultural experiences in [Stockholm](destination)
+    - activities in [Cape Town](destination)
+    - other touristic attractions in [Bali](destination)
+    - local culture in [Kerala](destination)
+    - community experiences in [New Zealand](destination)
+    - eco tours in [Costa Rica](destination)
+    - cultural tours in [Kyoto](destination)
+    - local experiences in [Lisbon](destination)
+    - what is there to see in [Copenhagen](destination)
+    - sightseeing in [Barcelona](destination)
+    - tourist attractions in [Amsterdam](destination)
+    - places to visit in [Rome](destination)
+    - things to explore in [Bangkok](destination)
+    - what should I visit in [Vienna](destination)
+    - outdoor activities in [Vancouver](destination)
+    - excursions in [Stockholm](destination)
+    - attractions in [Cape Town](destination)
+    - sustainable activities in [Bali](destination)
+    - indigenous tour in [New Zealand](destination)
+    - community tour in [Cape Town](destination)
+    - traditional experiences in [Kyoto](destination)
+    - kayaking in [Stockholm](destination)
+    - cycling in [Copenhagen](destination)
+    - canal tour in [Amsterdam](destination)
+    - cooking class in [Rome](destination)
+    - Fado evening in [Lisbon](destination)
+    - glacier walk in [Reykjavik](destination)
+    - rainforest tour in [Costa Rica](destination)
+    - temple visit in [Bangkok](destination)
+    - wine tasting in [Vienna](destination)
+    - forest walk in [Vancouver](destination)
+    - Kathakali in [Kerala](destination)
+    - Ayurveda in [Kerala](destination)
+    - rice terrace in [Bali](destination)
+    - what activities support the community in [Cape Town](destination)
+    - eco experiences in [Costa Rica](destination)
+    - what is there to do in [Reykjavik](destination)
+
+- intent: ask_transport
+  examples: |
+    - how do I get around in [Kerala](destination)
+    - transport options in [Bali](destination)
+    - how to travel in [Reykjavik](destination)
+    - public transport in [New Zealand](destination)
+    - how to get around [Lisbon](destination)
+    - cycling options in [Copenhagen](destination)
+    - trains in [Kyoto](destination)
+    - transport in [Costa Rica](destination)
+    - metro in [Barcelona](destination)
+    - bike routes in [Amsterdam](destination)
+    - how to travel around [Rome](destination)
+    - skytrain in [Bangkok](destination)
+    - tram in [Vienna](destination)
+    - transit in [Vancouver](destination)
+    - ferry in [Stockholm](destination)
+    - bus in [Cape Town](destination)
+    - low carbon transport in [Kerala](destination)
+    - eco-friendly travel in [Bali](destination)
+    - electric bus in [Reykjavik](destination)
+    - electric vehicle in [New Zealand](destination)
+    - sustainable transport in [Lisbon](destination)
+    - green transport in [Copenhagen](destination)
+    - houseboat in [Kerala](destination)
+    - riverboat in [Bangkok](destination)
+    - SkyTrain in [Vancouver](destination)
+    - seabus in [Vancouver](destination)
+    - tram in [Lisbon](destination)
+    - train in [Rome](destination)
+    - U-Bahn in [Vienna](destination)
+    - Tunnelbana in [Stockholm](destination)
+    - electric scooter in [Bali](destination)
+    - shuttle in [Costa Rica](destination)
+    - MyCiTi bus in [Cape Town](destination)
+
+- intent: ask_carbon_footprint
+  examples: |
+    - what is the carbon footprint for [Kerala](destination)
+    - carbon footprint of visiting [Bali](destination)
+    - how much CO2 to visit [Reykjavik](destination)
+    - carbon emissions for [New Zealand](destination)
+    - environmental impact of going to [Lisbon](destination)
+    - carbon cost of travelling to [Copenhagen](destination)
+    - how eco-friendly is [Kyoto](destination)
+    - carbon footprint to [Costa Rica](destination)
+    - CO2 emissions for [Barcelona](destination)
+    - carbon impact of visiting [Amsterdam](destination)
+    - how much carbon to go to [Rome](destination)
+    - environmental cost of [Bangkok](destination)
+    - carbon estimate for [Vienna](destination)
+    - emissions for [Vancouver](destination)
+    - carbon footprint of [Stockholm](destination)
+    - how green is travelling to [Cape Town](destination)
+    - what is my carbon footprint
+    - calculate carbon footprint
+    - how much carbon will I produce
+    - carbon emissions for my trip
+    - eco impact of my journey
+    - green score for [Kerala](destination)
+    - sustainability of flying to [Bali](destination)
+
+- intent: ask_offset
+  examples: |
+    - how can I offset my carbon in [Kerala](destination)
+    - carbon offset programmes in [Bali](destination)
+    - offset my emissions for [Reykjavik](destination)
+    - carbon offset in [New Zealand](destination)
+    - how to offset travel to [Lisbon](destination)
+    - offset programmes in [Copenhagen](destination)
+    - carbon credits in [Kyoto](destination)
+    - offset in [Costa Rica](destination)
+    - how to offset flights to [Barcelona](destination)
+    - offset my carbon for [Amsterdam](destination)
+    - carbon neutral travel to [Rome](destination)
+    - offset my trip to [Bangkok](destination)
+    - offsetting for [Vienna](destination)
+    - carbon credits for [Vancouver](destination)
+    - offset travel to [Stockholm](destination)
+    - offset in [Cape Town](destination)
+    - how do I offset my carbon footprint
+    - carbon offset options
+    - make my trip carbon neutral
+    - Gold Standard offset
+    - Verra offset programme
+    - reforestation offset
+
+- intent: ask_eco_tips
+  examples: |
+    - give me eco travel tips
+    - how to travel sustainably
+    - tips for green travel
+    - how to be eco-friendly while travelling
+    - sustainable tourism advice
+    - reduce my environmental impact
+    - how to travel with low carbon
+    - eco-friendly travel tips
+    - green holiday advice
+    - what is sustainable tourism
+    - how can I travel responsibly
+    - i need to plan a sustainable trip
+    - help me plan a sustainable trip
+    - i want to travel sustainably
+    - plan a trip for me
+    - i want to go somewhere eco-friendly
+    - i want to plan a green trip
+    - help me travel sustainably
+    - i need travel advice
+    - i want to plan an eco trip
+    - sustainable trip planning
+    - how do I plan a sustainable trip
+    - I want to make my trip eco-friendly
+    - where should I go for an eco trip
+    - plan an eco-friendly holiday for me
+    - I want to travel green
+
+- intent: bot_challenge
+  examples: |
+    - are you a bot
+    - are you human
+    - am I talking to a bot
+    - are you real
+    - who are you
+    - what are you  

@@ -1,0 +1,187 @@
+version: "3.1"
+
+# =====================================================================
+# Eco-Travel Advisor - Domain
+# Defines intents, entities, slots, responses, forms and custom actions.
+# Maps to Assignment Tasks 2 (requirements), 3 (UI elements) and 4 (NLP).
+# =====================================================================
+
+intents:
+  - greet
+  - goodbye
+  - affirm
+  - deny
+  - thank
+  - bot_challenge
+  - request_recommendation
+  - provide_trip_details
+  - ask_carbon_footprint
+  - request_human_advisor
+  - book_flight
+  - eco_question
+  - out_of_scope
+  - ask_weather
+
+entities:
+  - destination
+  - origin
+  - travel_dates
+  - budget
+  - sustainability_level
+  - transport_mode
+
+slots:
+  destination:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: destination
+      - type: from_text
+        conditions:
+          - active_loop: trip_intake_form
+            requested_slot: destination
+  origin:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: origin
+      - type: from_text
+        conditions:
+          - active_loop: trip_intake_form
+            requested_slot: origin
+  travel_dates:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: travel_dates
+      - type: from_text
+        conditions:
+          - active_loop: trip_intake_form
+            requested_slot: travel_dates
+  budget:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: budget
+      - type: from_text
+        conditions:
+          - active_loop: trip_intake_form
+            requested_slot: budget
+  sustainability_level:
+    type: categorical
+    values:
+      - low
+      - medium
+      - high
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: sustainability_level
+      - type: from_text
+        conditions:
+          - active_loop: trip_intake_form
+            requested_slot: sustainability_level
+  transport_mode:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: transport_mode
+
+responses:
+  utter_greet:
+    - text: "Hi! I'm GREEN ROUTE, your Eco-Travel Advisor. I help you plan low-carbon, sustainable trips. Where would you like to go?"
+
+  utter_goodbye:
+    - text: "Safe and sustainable travels! Goodbye."
+
+  utter_thank:
+    - text: "You're welcome - happy to help you travel greener."
+
+  utter_iamabot:
+    - text: "I'm GREEN ROUTE, an AI-powered Eco-Travel Advisor. For complex or personalised itineraries, I can hand you over to a human travel specialist."
+
+  utter_ask_destination:
+    - text: "Which destination are you considering?"
+      buttons:
+        - title: "Kerala"
+          payload: '/provide_trip_details{{"destination":"Kerala"}}'
+        - title: "Bali"
+          payload: '/provide_trip_details{{"destination":"Bali"}}'
+        - title: "Iceland"
+          payload: '/provide_trip_details{{"destination":"Reykjavik"}}'
+        - title: "New Zealand"
+          payload: '/provide_trip_details{{"destination":"New Zealand"}}'
+
+  utter_ask_origin:
+    - text: "Which city will you be travelling from? (this lets me calculate real carbon and find flights)"
+
+  utter_ask_travel_dates:
+    - text: "When are you planning to travel? (e.g. '12-18 August' or 'next month')"
+
+  utter_ask_budget:
+    - text: "Roughly what is your budget for this trip?"
+      buttons:
+        - title: "Budget (low)"
+          payload: '/provide_trip_details{{"budget":"low"}}'
+        - title: "Mid-range"
+          payload: '/provide_trip_details{{"budget":"medium"}}'
+        - title: "Premium"
+          payload: '/provide_trip_details{{"budget":"high"}}'
+
+  utter_ask_sustainability_level:
+    - text: "How important is sustainability for this trip? This helps me weight my recommendations."
+      buttons:
+        - title: "Very important"
+          payload: '/provide_trip_details{{"sustainability_level":"high"}}'
+        - title: "Somewhat"
+          payload: '/provide_trip_details{{"sustainability_level":"medium"}}'
+        - title: "Not a priority"
+          payload: '/provide_trip_details{{"sustainability_level":"low"}}'
+
+  utter_submit_intake:
+    - text: "Great - I have everything I need. Let me find sustainable options for you."
+
+  utter_no_value_found:
+    - text: "I couldn't find live data for that just now, so I'm showing curated eco-certified options from our database instead."
+
+  utter_default:
+    - text: "Sorry, I didn't quite catch that. Could you rephrase?"
+
+  utter_ask_rephrase:
+    - text: "I still didn't understand. Pick one of these options so I can help:"
+      buttons:
+        - title: "Plan a sustainable trip"
+          payload: "/request_recommendation"
+        - title: "Estimate a trip's carbon footprint"
+          payload: "/ask_carbon_footprint"
+        - title: "Talk to a human advisor"
+          payload: "/request_human_advisor"
+
+actions:
+  - action_trip_recommendation
+  - action_calculate_carbon
+  - action_human_handover
+  - action_default_fallback
+  - action_llm_advisor
+  - action_ask_destination
+  - action_book_flight
+  - validate_trip_intake_form
+  - action_get_weather
+
+forms:
+  trip_intake_form:
+    required_slots:
+      - destination
+      - origin
+      - travel_dates
+      - budget
+      - sustainability_level
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true

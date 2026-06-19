@@ -1,0 +1,11 @@
+# Endpoints for the Rasa server.
+# The action server runs separately (see docker-compose.yml).
+action_endpoint:
+  url: "http://localhost:5055/webhook"
+
+# In Docker Compose the action server is reachable on the internal network:
+# action_endpoint:
+#   url: "http://action-server:5055/webhook"
+
+tracker_store:
+  type: InMemoryTrackerStore

@@ -1,0 +1,28 @@
+# Docker Compose for local / HuggingFace Spaces deployment (Task 6).
+# Rasa server (5005) talks to the action server (5055) over the internal
+# network; the action server is NOT exposed publicly.
+version: "3.8"
+
+services:
+  rasa:
+    image: rasa/rasa:3.6.2-full
+    ports:
+      - "5005:5005"
+    volumes:
+      - ./:/app
+    command: >
+      run
+      --enable-api
+      --cors "*"
+      --endpoints endpoints.docker.yml
+    depends_on:
+      - action-server
+
+  action-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.actions
+    env_file:
+      - .env
+    expose:
+      - "5055"

@@ -1,0 +1,20 @@
+%% Scenario 1 - Short City Break (sustainability-led) (Task 3)
+flowchart TD
+    A([User: "Plan a sustainable trip"]) --> B[Activate trip_intake_form]
+    B --> C[Ask destination]
+    C --> D[Ask travel dates]
+    D --> E[Ask budget]
+    E --> F[Ask sustainability priority]
+    F --> G{Sustainability level?}
+    G -->|high| H[Weight carbon 0.6 / price 0.2]
+    G -->|medium| I[Weight carbon 0.4 / price 0.4]
+    G -->|low| J[Weight carbon 0.2 / price 0.6]
+    H --> K[Rank eco-hotels + transport + activities]
+    I --> K
+    J --> K
+    K --> L[Show green/amber/red carousel cards]
+    L --> M{Red option present?}
+    M -->|yes| N[Show high-emission alert + offset tip]
+    M -->|no| O[Offer carbon estimate]
+    N --> O
+    O --> P([End / further questions])

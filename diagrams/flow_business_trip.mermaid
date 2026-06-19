@@ -1,0 +1,15 @@
+%% Scenario 3 - Carbon-neutral business trip (escalation path) (Task 3)
+flowchart TD
+    A([User: "Carbon-neutral business trip, complex itinerary"]) --> B[trip_intake_form gathers details]
+    B --> C[Action ranks low-carbon options]
+    C --> D[Carbon estimate flags high-emission flight]
+    D --> E[Show red alert + offset recommendation]
+    E --> F{User requests personalised help<br/>OR fallback repeated?}
+    F -->|user asks for human| G[action_human_handover]
+    F -->|2 consecutive fallbacks| H[Stage 2: constrained quick-reply options]
+    H --> I{Still unresolved?}
+    I -->|yes| G
+    I -->|no| C
+    G --> J[Package slots + recent messages]
+    J --> K[Show handover banner to user]
+    K --> L([Human specialist takes over])

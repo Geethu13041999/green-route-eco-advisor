@@ -1,0 +1,89 @@
+version: "3.1"
+
+# Test stories for `rasa test core` (Task 5: Dialogue Testing).
+# These cover happy paths, the multi-slot intake form, the new flight-booking and
+# eco-question flows, the two-stage fallback, and the human handover edge case.
+
+stories:
+  - story: TEST greet then plan sustainable trip (full intake form)
+    steps:
+      - user: |
+          hi
+        intent: greet
+      - action: utter_greet
+      - user: |
+          help me plan a sustainable trip
+        intent: request_recommendation
+      - action: trip_intake_form
+      - active_loop: trip_intake_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: utter_submit_intake
+      - action: action_trip_recommendation
+
+  - story: TEST recommendation then thanks
+    steps:
+      - user: |
+          recommend some green travel options
+        intent: request_recommendation
+      - action: trip_intake_form
+      - active_loop: trip_intake_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: utter_submit_intake
+      - action: action_trip_recommendation
+      - user: |
+          thanks a lot
+        intent: thank
+      - action: utter_thank
+
+  - story: TEST carbon footprint query
+    steps:
+      - user: |
+          what is the carbon footprint of flying to [Tokyo](destination)
+        intent: ask_carbon_footprint
+      - action: action_calculate_carbon
+
+  - story: TEST book a flight
+    steps:
+      - user: |
+          book a flight from [London](origin) to [Bangkok](destination)
+        intent: book_flight
+      - action: action_book_flight
+
+  - story: TEST open-ended eco question (LLM advisor)
+    steps:
+      - user: |
+          is flying worse than taking the train
+        intent: eco_question
+      - action: action_llm_advisor
+
+  - story: TEST bot challenge
+    steps:
+      - user: |
+          are you a bot
+        intent: bot_challenge
+      - action: utter_iamabot
+
+  - story: TEST two-stage fallback on low confidence
+    steps:
+      - user: |
+          asdkjfh qwerty
+        intent: nlu_fallback
+      - action: action_default_fallback
+
+  - story: TEST human handover request
+    steps:
+      - user: |
+          I want to talk to a human advisor
+        intent: request_human_advisor
+      - action: action_human_handover
+
+  - story: TEST goodbye
+    steps:
+      - user: |
+          bye
+        intent: goodbye
+      - action: utter_goodbye

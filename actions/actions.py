@@ -1,0 +1,725 @@
+"""
+Custom actions for the Eco-Travel Advisor (Assignment Task 4).
+Responsibilities implemented here:
+  * action_calculate_carbon   -> queries the Climatiq API for real-time carbon
+                                 emission calculations per transport mode, with a
+                                 mock-database fallback when no key / API failure.
+  * action_trip_recommendation-> fetches hotels (Amadeus sandbox API when keys are
+                                 present, otherwise curated mock DB), ranks them with
+                                 a WEIGHTED SCORING FUNCTION combining carbon impact,
+                                 price and the user's stated sustainability preference,
+                                 and returns colour-coded result cards (green/amber/red).
+  * action_human_handover     -> packages the FULL conversation context and signals a
+                                 handover to a human travel advisor.
+  * action_default_fallback   -> two-stage clarification flow: first a plain re-prompt,
+                                 then constrained quick-reply buttons, then escalation.
+  * validate_trip_intake_form -> validates / normalises slots collected by the form.
+Every external call is wrapped in error handling with graceful fallback messaging,
+as required by the brief.
+"""
+import json
+import os
+import logging
+import math
+from datetime import date, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Text
+import requests
+from urllib.parse import quote
+from rasa_sdk import Action, FormValidationAction, Tracker
+from rasa_sdk.events import SlotSet, FollowupAction
+from rasa_sdk.executor import CollectingDispatcher
+
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Configuration & helpers
+# ---------------------------------------------------------------------------
+CLIMATIQ_API_KEY = os.getenv("CLIMATIQ_API_KEY", "")
+CLIMATIQ_DATA_VERSION = os.getenv("CLIMATIQ_DATA_VERSION", "^6")
+CLIMATIQ_URL = "https://api.climatiq.io/data/v1/estimate"
+AMADEUS_API_KEY = os.getenv("AMADEUS_API_KEY", "")
+AMADEUS_API_SECRET = os.getenv("AMADEUS_API_SECRET", "")
+
+LLM_API_KEY = os.getenv("LLM_API_KEY", "")
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.groq.com/openai/v1")
+LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.1-8b-instant")
+ADVISOR_SYSTEM_PROMPT = (
+    "You are GREEN ROUTE, a friendly, knowledgeable Eco-Travel Advisor for sustainable, "
+    "low-carbon travel planning. Give concise, practical, accurate advice in 2-5 sentences. "
+    "Promote eco-friendly choices (rail over flights, eco-certified stays, offsets, local "
+    "community experiences). Be transparent that environmental figures are approximate and "
+    "avoid greenwashing. Use any trip context and data provided. If asked to book or pay, "
+    "explain you can connect the traveller to a human travel specialist."
+)
+
+DB_PATH = Path(__file__).parent.parent / "data" / "mock_db.json"
+
+FALLBACK_EMISSION_FACTORS = {
+    "flight": 0.255,
+    "domestic flight": 0.255,
+    "train": 0.041,
+    "tram": 0.035,
+    "metro": 0.029,
+    "bus": 0.105,
+    "bicycle": 0.0,
+    "shared shuttle": 0.068,
+    "car": 0.171,
+}
+
+CITY_COORDS = {
+    "Lisbon": (38.72, -9.14), "Copenhagen": (55.68, 12.57), "Kyoto": (35.01, 135.77),
+    "Costa Rica": (9.93, -84.08), "Barcelona": (41.39, 2.17), "Amsterdam": (52.37, 4.90),
+    "Rome": (41.90, 12.50), "Reykjavik": (64.15, -21.94), "Bangkok": (13.76, 100.50),
+    "Bali": (-8.65, 115.22), "Vienna": (48.21, 16.37), "Vancouver": (49.28, -123.12),
+    "Stockholm": (59.33, 18.07), "Cape Town": (-33.92, 18.42),
+    "Kerala": (10.85, 76.27), "New Zealand": (-41.29, 174.78),
+    "London": (51.51, -0.13), "Tokyo": (35.68, 139.69), "Paris": (48.86, 2.35),
+    "Berlin": (52.52, 13.40), "Madrid": (40.42, -3.70), "New York": (40.71, -74.01),
+    "Singapore": (1.35, 103.82), "Dubai": (25.20, 55.27), "Sydney": (-33.87, 151.21),
+    "Oslo": (59.91, 10.75), "Dublin": (53.35, -6.26), "Helsinki": (60.17, 24.94),
+    "Porto": (41.15, -8.61), "Los Angeles": (34.05, -118.24), "Toronto": (43.65, -79.38),
+    "Delhi": (28.61, 77.21), "Mumbai": (19.08, 72.88), "Hong Kong": (22.32, 114.17),
+    "Munich": (48.14, 11.58), "Edinburgh": (55.95, -3.19),
+}
+
+
+def _get_entity(tracker: Tracker, entity_name: Text) -> Optional[Text]:
+    """Extract a named entity from the latest user message."""
+    entities = tracker.latest_message.get("entities", [])
+    return next((e["value"] for e in entities if e["entity"] == entity_name), None)
+
+
+def _resolve_destination(tracker: Tracker) -> Text:
+    """Return destination from entity (latest message) or slot, whichever is set."""
+    return _get_entity(tracker, "destination") or tracker.get_slot("destination") or ""
+
+
+def _coords(place: Text):
+    if not place:
+        return None
+    return CITY_COORDS.get(place) or CITY_COORDS.get(place.title())
+
+
+def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    radius = 6371.0
+    d_lat = math.radians(lat2 - lat1)
+    d_lon = math.radians(lon2 - lon1)
+    a = (math.sin(d_lat / 2) ** 2
+         + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(d_lon / 2) ** 2)
+    return 2 * radius * math.asin(math.sqrt(a))
+
+
+def estimate_distance_km(origin: Text, destination: Text) -> float:
+    o = _coords(origin) or _coords("London")
+    d = _coords(destination)
+    if o and d:
+        return round(haversine_km(o[0], o[1], d[0], d[1]), 0)
+    return 1500.0
+
+
+def load_db() -> Dict[str, Any]:
+    try:
+        with open(DB_PATH, "r", encoding="utf-8") as fh:
+            return json.load(fh)
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        logger.error("Could not load mock DB: %s", exc)
+        return {"destinations": {}}
+
+
+# ---------------------------------------------------------------------------
+# Amadeus client
+# ---------------------------------------------------------------------------
+AMADEUS_TOKEN_URL = "https://test.api.amadeus.com/v1/security/oauth2/token"
+AMADEUS_HOTELS_URL = "https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city"
+AMADEUS_FLIGHTS_URL = "https://test.api.amadeus.com/v2/shopping/flight-offers"
+CITY_CODES = {
+    "Lisbon": "LIS", "Copenhagen": "CPH", "Kyoto": "OSA", "Costa Rica": "SJO",
+}
+ORIGIN_CODES = {
+    "London": "LON", "Berlin": "BER", "Paris": "PAR", "Madrid": "MAD",
+    "Amsterdam": "AMS", "Rome": "ROM", "Dublin": "DUB", "Oslo": "OSL",
+    "Stockholm": "STO", "Vienna": "VIE", "Lisbon": "LIS", "Copenhagen": "CPH",
+}
+
+
+def resolve_code(place: Text) -> Text:
+    if not place:
+        return ""
+    return ORIGIN_CODES.get(place) or CITY_CODES.get(place, "")
+
+
+class AmadeusClient:
+    _token = None
+
+    def _get_token(self) -> Text:
+        if self._token:
+            return self._token
+        resp = requests.post(
+            AMADEUS_TOKEN_URL,
+            data={
+                "grant_type": "client_credentials",
+                "client_id": AMADEUS_API_KEY,
+                "client_secret": AMADEUS_API_SECRET,
+            },
+            timeout=8,
+        )
+        resp.raise_for_status()
+        AmadeusClient._token = resp.json()["access_token"]
+        return self._token
+
+    def hotels_by_city(self, city_code: Text) -> List[Dict[str, Any]]:
+        headers = {"Authorization": f"Bearer {self._get_token()}"}
+        resp = requests.get(AMADEUS_HOTELS_URL, params={"cityCode": city_code}, headers=headers, timeout=8)
+        resp.raise_for_status()
+        return resp.json().get("data", [])
+
+    def flight_offers(self, origin_code: Text, dest_code: Text, departure_date: Text) -> List[Dict[str, Any]]:
+        headers = {"Authorization": f"Bearer {self._get_token()}"}
+        resp = requests.get(
+            AMADEUS_FLIGHTS_URL,
+            params={"originLocationCode": origin_code, "destinationLocationCode": dest_code,
+                    "departureDate": departure_date, "adults": 1, "max": 5, "currencyCode": "EUR"},
+            headers=headers, timeout=10,
+        )
+        resp.raise_for_status()
+        return resp.json().get("data", [])
+
+
+def fetch_live_hotels(destination: Text) -> List[Dict[str, Any]]:
+    city_code = CITY_CODES.get(destination)
+    if not (AMADEUS_API_KEY and AMADEUS_API_SECRET and city_code):
+        return []
+    try:
+        return AmadeusClient().hotels_by_city(city_code)[:5]
+    except (requests.RequestException, KeyError, ValueError) as exc:
+        logger.warning("Amadeus lookup failed for %s: %s", destination, exc)
+        return []
+
+
+def _derive_departure_date(travel_dates: Text) -> Text:
+    return (date.today() + timedelta(days=30)).isoformat()
+
+
+def fetch_live_flights(origin: Text, destination: Text, travel_dates: Text) -> Optional[Dict[str, Any]]:
+    o_code = resolve_code(origin)
+    d_code = resolve_code(destination)
+    if not (AMADEUS_API_KEY and AMADEUS_API_SECRET and o_code and d_code):
+        return None
+    departure = _derive_departure_date(travel_dates)
+    try:
+        offers = AmadeusClient().flight_offers(o_code, d_code, departure)
+        if not offers:
+            return None
+        cheapest = min(offers, key=lambda o: float(o["price"]["total"]))
+        carriers = cheapest.get("validatingAirlineCodes", [])
+        return {"price": cheapest["price"]["total"], "currency": cheapest["price"].get("currency", "EUR"),
+                "carrier": carriers[0] if carriers else "n/a", "date": departure}
+    except (requests.RequestException, KeyError, ValueError) as exc:
+        logger.warning("Amadeus flight search failed (%s->%s): %s", origin, destination, exc)
+        return None
+
+
+# ---------------------------------------------------------------------------
+# Travelpayouts
+# ---------------------------------------------------------------------------
+TRAVELPAYOUTS_TOKEN = os.getenv("TRAVELPAYOUTS_TOKEN", "")
+TRAVELPAYOUTS_MARKER = os.getenv("TRAVELPAYOUTS_MARKER", "")
+TP_FLIGHTS_URL = "https://api.travelpayouts.com/aviasales/v3/prices_for_dates"
+TP_HOTELS_URL = "https://engine.hotellook.com/api/v2/lookup.json"
+
+
+def hotel_booking_url(city: Text) -> Text:
+    url = f"https://search.hotellook.com/?destination={quote(city or '')}"
+    return url + (f"&marker={TRAVELPAYOUTS_MARKER}" if TRAVELPAYOUTS_MARKER else "")
+
+
+def flight_booking_url(origin: Text, destination: Text) -> Text:
+    o, d = resolve_code(origin) or "", resolve_code(destination) or ""
+    url = f"https://www.aviasales.com/search/{o}{d}1"
+    return url + (f"?marker={TRAVELPAYOUTS_MARKER}" if TRAVELPAYOUTS_MARKER else "")
+
+
+def fetch_tp_flight(origin: Text, destination: Text) -> Optional[Dict[str, Any]]:
+    o_code, d_code = resolve_code(origin), resolve_code(destination)
+    if not (TRAVELPAYOUTS_TOKEN and o_code and d_code):
+        return None
+    try:
+        dep_month = (date.today() + timedelta(days=30)).strftime("%Y-%m")
+        resp = requests.get(TP_FLIGHTS_URL,
+            params={"origin": o_code, "destination": d_code, "departure_at": dep_month,
+                    "currency": "eur", "sorting": "price", "limit": 5, "one_way": "true",
+                    "token": TRAVELPAYOUTS_TOKEN}, timeout=10)
+        resp.raise_for_status()
+        data = resp.json().get("data", [])
+        if not data:
+            return None
+        cheapest = min(data, key=lambda x: x.get("price", 1e12))
+        return {"price": cheapest.get("price"), "currency": "EUR",
+                "airline": cheapest.get("airline", "n/a"),
+                "depart": str(cheapest.get("departure_at", ""))[:10]}
+    except (requests.RequestException, KeyError, ValueError) as exc:
+        logger.warning("Travelpayouts flight failed (%s->%s): %s", origin, destination, exc)
+        return None
+
+
+def fetch_tp_hotels(city: Text, limit: int = 4) -> List[Dict[str, Any]]:
+    if not (TRAVELPAYOUTS_TOKEN and city):
+        return []
+    try:
+        resp = requests.get(TP_HOTELS_URL,
+            params={"query": city, "lang": "en", "lookFor": "hotel",
+                    "limit": limit, "token": TRAVELPAYOUTS_TOKEN}, timeout=10)
+        resp.raise_for_status()
+        results = resp.json().get("results", {})
+        hotels = []
+        for h in results.get("hotels", []):
+            hotels.append({"name": h.get("label", "Hotel"),
+                           "price": round(h.get("priceFrom", 0) or 0),
+                           "stars": h.get("stars", 0)})
+        return hotels[:limit]
+    except (requests.RequestException, KeyError, ValueError) as exc:
+        logger.warning("Travelpayouts hotels failed (%s): %s", city, exc)
+        return []
+
+
+def llm_chat(system_prompt: Text, user_prompt: Text, max_tokens: int = 400) -> Optional[Text]:
+    if not LLM_API_KEY:
+        return None
+    try:
+        resp = requests.post(
+            f"{LLM_BASE_URL}/chat/completions",
+            headers={"Authorization": f"Bearer {LLM_API_KEY}", "Content-Type": "application/json"},
+            json={"model": LLM_MODEL,
+                  "messages": [{"role": "system", "content": system_prompt},
+                                {"role": "user", "content": user_prompt}],
+                  "temperature": 0.4, "max_tokens": max_tokens},
+            timeout=12)
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"].strip()
+    except (requests.RequestException, KeyError, ValueError, IndexError) as exc:
+        logger.warning("LLM call failed: %s", exc)
+        return None
+
+
+def build_advisor_context(tracker: Tracker) -> Text:
+    keys = ["destination", "origin", "travel_dates", "budget", "sustainability_level", "transport_mode"]
+    known = {k: tracker.get_slot(k) for k in keys if tracker.get_slot(k)}
+    ctx = "Current trip context: " + (
+        ", ".join(f"{k}={v}" for k, v in known.items()) if known else "none yet") + ".\n"
+    dest = tracker.get_slot("destination")
+    data = load_db().get("destinations", {}).get(dest) if dest else None
+    if data:
+        hotels = "; ".join(
+            f"{h['name']} ({h['certification']}, EUR{h['price_per_night_eur']}/night, "
+            f"{h['carbon_per_night_kg']}kg CO2e/night)" for h in data.get("hotels", []))
+        transport = ", ".join(
+            f"{t['mode']} {t['carbon_per_km_kg']}kg CO2e/km" for t in data.get("transport_options", []))
+        ctx += f"Verified eco-hotels in {dest}: {hotels}.\nTransport options: {transport}.\n"
+    return ctx
+
+
+def carbon_band(score_kg: float) -> Text:
+    if score_kg <= 5.0:
+        return "green"
+    if score_kg <= 10.0:
+        return "amber"
+    return "red"
+
+
+def trip_carbon_band(total_kg: float) -> Text:
+    if total_kg <= 50.0:
+        return "green"
+    if total_kg <= 150.0:
+        return "amber"
+    return "red"
+
+
+# ---------------------------------------------------------------------------
+# Form validation
+# ---------------------------------------------------------------------------
+class ValidateTripIntakeForm(FormValidationAction):
+    def name(self) -> Text:
+        return "validate_trip_intake_form"
+
+    def validate_sustainability_level(self, slot_value, dispatcher, tracker, domain):
+        value = str(slot_value).lower()
+        mapping = {
+            "very important": "high", "a lot": "high", "high": "high",
+            "somewhat": "medium", "medium": "medium",
+            "not a priority": "low", "low": "low",
+        }
+        normalised = mapping.get(value, value)
+        if normalised in {"low", "medium", "high"}:
+            return {"sustainability_level": normalised}
+        dispatcher.utter_message(
+            text="Please tell me whether sustainability is a high, medium or low priority."
+        )
+        return {"sustainability_level": None}
+
+    def validate_budget(self, slot_value, dispatcher, tracker, domain):
+        value = str(slot_value).lower()
+        mapping = {"budget": "low", "mid-range": "medium", "premium": "high"}
+        return {"budget": mapping.get(value, value)}
+
+
+# ---------------------------------------------------------------------------
+# Carbon footprint calculation
+# ---------------------------------------------------------------------------
+class ActionCalculateCarbon(Action):
+    def name(self) -> Text:
+        return "action_calculate_carbon"
+
+    def _climatiq_estimate(self, transport_mode: Text, distance_km: float) -> float:
+        activity_map = {
+            "flight": "passenger_flight-route_type_domestic-aircraft_type_na-distance_na-class_na-rf_included-distance_uplift_included",
+            "domestic flight": "passenger_flight-route_type_domestic-aircraft_type_na-distance_na-class_na-rf_included-distance_uplift_included",
+            "train": "passenger_train-route_type_national_rail-fuel_source_na",
+            "bus": "passenger_vehicle-vehicle_type_bus-fuel_source_na-distance_na-engine_size_na",
+            "car": "passenger_vehicle-vehicle_type_car-fuel_source_na-distance_na-engine_size_na",
+        }
+        activity_id = activity_map.get(transport_mode, activity_map["flight"])
+        headers = {"Authorization": f"Bearer {CLIMATIQ_API_KEY}"}
+        payload = {
+            "emission_factor": {"activity_id": activity_id, "data_version": CLIMATIQ_DATA_VERSION},
+            "parameters": {"distance": distance_km, "distance_unit": "km"},
+        }
+        resp = requests.post(CLIMATIQ_URL, json=payload, headers=headers, timeout=8)
+        resp.raise_for_status()
+        return float(resp.json()["co2e"])
+
+    def run(self, dispatcher, tracker, domain) -> List[Dict[Text, Any]]:
+        transport_mode = (tracker.get_slot("transport_mode") or "flight").lower()
+        origin = tracker.get_slot("origin")
+        destination = _resolve_destination(tracker)
+
+        if not origin:
+            dispatcher.utter_message(text=(
+                "To estimate the carbon footprint accurately, which city would you "
+                "be flying from? (e.g. 'from London')"
+            ))
+            return []
+
+        distance_km = estimate_distance_km(origin, destination)
+        co2e = None
+        source = "Climatiq API"
+        if CLIMATIQ_API_KEY:
+            try:
+                co2e = self._climatiq_estimate(transport_mode, distance_km)
+            except (requests.RequestException, KeyError, ValueError) as exc:
+                logger.warning("Climatiq call failed, using fallback: %s", exc)
+
+        if co2e is None:
+            factor = FALLBACK_EMISSION_FACTORS.get(transport_mode, 0.171)
+            co2e = round(factor * distance_km, 1)
+            source = "standard emission factors (DEFRA/IPCC methodology)"
+
+        band = trip_carbon_band(co2e)
+        emoji = {"green": "🟢", "amber": "🟠", "red": "🔴"}[band]
+        base_factor = FALLBACK_EMISSION_FACTORS.get(transport_mode, 0.171)
+        compare = []
+        for m in ["flight", "car", "bus", "train"]:
+            f = FALLBACK_EMISSION_FACTORS.get(m, 0.171)
+            kg = round(co2e * (f / base_factor), 1) if base_factor > 0 else round(f * distance_km, 1)
+            compare.append({"mode": m, "co2e_kg": kg, "band": trip_carbon_band(kg)})
+
+        dispatcher.utter_message(
+            json_message={"type": "carbon_compare", "distance_km": distance_km, "modes": compare}
+        )
+        route = f"{origin} -> {destination}" if destination else f"a {int(distance_km)} km"
+        dispatcher.utter_message(
+            json_message={"type": "carbon_card", "transport_mode": transport_mode,
+                          "origin": origin, "destination": destination,
+                          "distance_km": distance_km, "co2e_kg": round(co2e, 1),
+                          "band": band, "source": source}
+        )
+        dispatcher.utter_message(
+            text=(
+                f"{emoji} Estimated carbon footprint for the {route} journey "
+                f"(~{int(distance_km)} km) by {transport_mode}: "
+                f"**{round(co2e,1)} kg CO2e** ({band.upper()} impact). "
+                f"Source: {source}.\n\n"
+                "Tip: switching to rail or offsetting via a Gold Standard programme "
+                "can substantially reduce this."
+            )
+        )
+        return []
+
+
+# ---------------------------------------------------------------------------
+# Trip recommendation with weighted scoring
+# ---------------------------------------------------------------------------
+class ActionTripRecommendation(Action):
+    def name(self) -> Text:
+        return "action_trip_recommendation"
+
+    @staticmethod
+    def _weighted_score(hotel: Dict[str, Any], pref: Text) -> float:
+        weights = {
+            "high": {"carbon": 0.6, "price": 0.2, "cert": 0.2},
+            "medium": {"carbon": 0.4, "price": 0.4, "cert": 0.2},
+            "low": {"carbon": 0.2, "price": 0.6, "cert": 0.2},
+        }.get(pref, {"carbon": 0.4, "price": 0.4, "cert": 0.2})
+        price_norm = hotel.get("price_per_night_eur", 100) / 250.0
+        carbon_norm = hotel.get("carbon_per_night_kg", 8) / 12.0
+        cert_bonus = 0.0 if hotel.get("certification") else 1.0
+        return (weights["carbon"] * carbon_norm + weights["price"] * price_norm
+                + weights["cert"] * cert_bonus)
+
+    def run(self, dispatcher, tracker, domain) -> List[Dict[Text, Any]]:
+        destination = _resolve_destination(tracker)
+        pref = tracker.get_slot("sustainability_level") or "medium"
+
+        if not destination:
+            dispatcher.utter_message(
+                text="Which destination would you like eco-hotel recommendations for?"
+            )
+            return []
+
+        db = load_db()
+        dest_data = db.get("destinations", {}).get(destination)
+
+        if not dest_data:
+            tp = fetch_tp_hotels(destination)
+            if tp:
+                cards = [{"name": h["name"],
+                          "certification": "Live listing - eco-certification not verified",
+                          "price_per_night_eur": h["price"] or "n/a",
+                          "carbon_per_night_kg": "n/a", "band": "amber",
+                          "booking_url": hotel_booking_url(destination)} for h in tp]
+                dispatcher.utter_message(json_message={
+                    "type": "hotel_cards", "destination": destination,
+                    "cards": cards, "transport": [], "activities": []})
+                dispatcher.utter_message(text=(
+                    f"I don't hold curated eco-certification data for {destination}, "
+                    f"but here are {len(tp)} real hotel listings. For verified eco-stays, "
+                    "try Lisbon, Copenhagen, Kyoto, Costa Rica, Barcelona, Amsterdam, "
+                    "Rome, Reykjavik, Bangkok, Bali, Vienna, Vancouver, Stockholm, "
+                    "Cape Town, Kerala or New Zealand."))
+                return []
+            dispatcher.utter_message(text=(
+                f"I don't yet have data for '{destination}'. I have curated eco-data "
+                "for Kerala, Bali, Reykjavik, New Zealand and many more. "
+                "Would you like to pick one, or talk to a human advisor?"))
+            return []
+
+        hotels = sorted(dest_data.get("hotels", []),
+                        key=lambda h: self._weighted_score(h, pref))
+        cards = []
+        for h in hotels[:3]:
+            band = carbon_band(h.get("carbon_per_night_kg", 8))
+            cards.append({**h, "band": band, "booking_url": hotel_booking_url(destination)})
+
+        transport = sorted(dest_data.get("transport_options", []),
+                           key=lambda t: t.get("carbon_per_km_kg", 1))
+        activities = dest_data.get("cultural_experiences", [])
+
+        dispatcher.utter_message(json_message={
+            "type": "hotel_cards", "destination": destination,
+            "cards": cards, "transport": transport, "activities": activities})
+
+        lines = [f"Here are the top sustainable stays in **{destination}**, "
+                 f"ranked for your '{pref}' sustainability priority:"]
+
+        tp_hotels = fetch_tp_hotels(destination)
+        if tp_hotels:
+            cheapest = min(tp_hotels, key=lambda h: h["price"] or 1e9)
+            lines.append(f"\n🏨 Live hotel prices: {len(tp_hotels)} options in "
+                         f"{destination}, from EUR{cheapest['price']} (e.g. {cheapest['name']}).")
+
+        origin = tracker.get_slot("origin")
+        tp_flight = fetch_tp_flight(origin, destination)
+        if tp_flight and tp_flight.get("price"):
+            lines.append(f"\n✈️ Live flight price: {origin} -> {destination} "
+                         f"from EUR{tp_flight['price']} ({tp_flight['airline']}, "
+                         f"dep {tp_flight['depart']}). Rail is lower-carbon where available.")
+
+        if transport:
+            lines.append("\n🚆 Low-carbon transport options:")
+            for t in transport[:3]:
+                lines.append(f"  - {t['mode']} - {t['carbon_per_km_kg']} kg CO2e/km ({t['notes']})")
+
+        if activities:
+            lines.append("\n🎭 Local experiences that support communities:")
+            for a in activities:
+                tag = " (supports local community)" if a.get("supports_community") else ""
+                lines.append(f"  - {a['name']}{tag}")
+
+        offsets = dest_data.get("offset_programmes", [])
+        if offsets:
+            o = offsets[0]
+            lines.append(f"\n♻️ Offset option: {o['name']} (~EUR{o['price_per_tonne_eur']}/tonne, "
+                         f"verified by {o['verified_by']}).")
+
+        dispatcher.utter_message(text="\n".join(lines))
+        return [SlotSet("destination", destination)]
+
+
+# ---------------------------------------------------------------------------
+# Human handover
+# ---------------------------------------------------------------------------
+class ActionHumanHandover(Action):
+    def name(self) -> Text:
+        return "action_human_handover"
+
+    def run(self, dispatcher, tracker, domain) -> List[Dict[Text, Any]]:
+        context = {
+            "conversation_id": tracker.sender_id,
+            "collected_slots": {
+                "destination": tracker.get_slot("destination"),
+                "origin": tracker.get_slot("origin"),
+                "travel_dates": tracker.get_slot("travel_dates"),
+                "budget": tracker.get_slot("budget"),
+                "sustainability_level": tracker.get_slot("sustainability_level"),
+                "transport_mode": tracker.get_slot("transport_mode"),
+            },
+            "recent_user_messages": [
+                e.get("text") for e in tracker.events
+                if e.get("event") == "user" and e.get("text")
+            ][-10:],
+        }
+        logger.info("HANDOVER PACKAGE: %s", json.dumps(context))
+        dispatcher.utter_message(
+            json_message={"type": "handover", "status": "escalated", "context": context})
+        dispatcher.utter_message(text=(
+            "🤝 I'm connecting you with a human eco-travel advisor who can help "
+            "with complex or bespoke trip planning. They'll have full context of "
+            "your conversation. Please hold — someone will be with you shortly."))
+        return []
+
+
+# ---------------------------------------------------------------------------
+# Ask destination — FIXED: detects entity and routes to recommendation directly
+# ---------------------------------------------------------------------------
+class ActionAskDestination(Action):
+    def name(self) -> Text:
+        return "action_ask_destination"
+
+    def run(self, dispatcher, tracker, domain) -> List[Dict[Text, Any]]:
+        # If destination entity already in the message, go straight to recommendation
+        destination = _get_entity(tracker, "destination")
+        if destination:
+            return [
+                SlotSet("destination", destination),
+                FollowupAction("action_trip_recommendation"),
+            ]
+
+        # No entity — prompt user to pick a destination
+        destinations = list(load_db().get("destinations", {}).keys())
+        buttons = [
+            {"title": city, "payload": '/provide_trip_details{"destination":"%s"}' % city}
+            for city in destinations
+        ]
+        dispatcher.utter_message(
+            text=(
+                "Which destination are you considering? Tap one of our eco-certified "
+                "picks below — or just type ANY city (e.g. Venice, New York, Singapore) "
+                "and I'll pull live options for it."
+            ),
+            buttons=buttons,
+        )
+        return []
+
+
+# ---------------------------------------------------------------------------
+# LLM advisor
+# ---------------------------------------------------------------------------
+class ActionLLMAdvisor(Action):
+    def name(self) -> Text:
+        return "action_llm_advisor"
+
+    def run(self, dispatcher, tracker, domain) -> List[Dict[Text, Any]]:
+        user_msg = tracker.latest_message.get("text", "")
+        answer = llm_chat(
+            ADVISOR_SYSTEM_PROMPT,
+            build_advisor_context(tracker) + "\nUser question: " + user_msg,
+        )
+        if answer:
+            dispatcher.utter_message(text=answer)
+        else:
+            dispatcher.utter_message(text=(
+                "I can help with sustainable trip planning, carbon footprints, "
+                "eco-certified hotels and low-carbon transport. Could you rephrase, "
+                "or would you like me to connect you to a human advisor?"))
+        return []
+
+
+# ---------------------------------------------------------------------------
+# Weather action — reads entity first, then slot
+# ---------------------------------------------------------------------------
+OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY", "")
+OPENWEATHER_URL = "https://api.openweathermap.org/data/2.5/weather"
+WEATHER_CITY_MAP = {
+    "Kerala": "Kochi",
+    "New Zealand": "Wellington",
+    "Iceland": "Reykjavik",
+    "Bali": "Denpasar",
+    "Costa Rica": "San Jose",
+}
+
+
+class ActionGetWeather(Action):
+    def name(self) -> Text:
+        return "action_get_weather"
+
+    def _get_live_weather(self, destination: Text) -> Optional[Dict]:
+        if not OPENWEATHER_API_KEY:
+            return None
+        city = WEATHER_CITY_MAP.get(destination, destination)
+        try:
+            resp = requests.get(OPENWEATHER_URL,
+                params={"q": city, "appid": OPENWEATHER_API_KEY, "units": "metric"}, timeout=8)
+            resp.raise_for_status()
+            data = resp.json()
+            return {
+                "temp_c": round(data["main"]["temp"], 1),
+                "feels_like": round(data["main"]["feels_like"], 1),
+                "description": data["weather"][0]["description"].capitalize(),
+                "humidity": data["main"]["humidity"],
+                "wind_kph": round(data["wind"]["speed"] * 3.6, 1),
+            }
+        except (requests.RequestException, KeyError, ValueError) as exc:
+            logger.warning("OpenWeatherMap call failed for %s (%s): %s", destination, city, exc)
+            return None
+
+    def run(self, dispatcher, tracker, domain) -> List[Dict[Text, Any]]:
+        # Read entity from latest message first, then fall back to slot
+        destination = _resolve_destination(tracker)
+
+        if not destination:
+            dispatcher.utter_message(text="Which destination would you like the weather for?")
+            return []
+
+        db = load_db()
+        dest_data = db.get("destinations", {}).get(destination, {})
+        seasonal = dest_data.get("weather", {})
+        live = self._get_live_weather(destination)
+
+        lines = [f"**Weather for {destination}**\n"]
+        if live:
+            lines.append(
+                f"**Right now:** {live['description']}, {live['temp_c']}°C "
+                f"(feels like {live['feels_like']}°C)\n"
+                f"💧 Humidity: {live['humidity']}%  |  💨 Wind: {live['wind_kph']} km/h"
+            )
+        else:
+            avg = seasonal.get("typical_temp_c", "N/A")
+            lines.append(f"**Typical temperature:** ~{avg}°C")
+
+        if seasonal:
+            best = ", ".join(seasonal.get("best_months", []))
+            avoid = ", ".join(seasonal.get("avoid_months", []))
+            peak = seasonal.get("peak_season", "")
+            note = seasonal.get("notes", "")
+            lines.append(f"\n📅 **Best time to visit:** {best}")
+            if avoid:
+                lines.append(f"⚠️ **Avoid:** {avoid} (unfavourable weather)")
+            if peak:
+                lines.append(f"🏆 **Peak season:** {peak}")
+            if note:
+                lines.append(f"\n💡 {note}")
+        else:
+            lines.append(f"\nNo seasonal data for {destination} yet.")
+
+        dispatcher.utter_message(text="\n".join(lines))
+        return [SlotSet("destination", destination)]

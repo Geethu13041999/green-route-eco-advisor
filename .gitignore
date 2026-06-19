@@ -1,0 +1,23 @@
+# Secrets - never commit
+.env
+
+# Rasa generated artefacts
+models/
+.rasa/
+*.tar.gz
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Logs / OS
+*.log
+.DS_Store
+results/
+
+# Temporary API test scripts (kept local only)
+climatiq_test.py
+travelpayouts_test.py

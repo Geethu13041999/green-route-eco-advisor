@@ -1,0 +1,70 @@
+version: "3.1"
+
+stories:
+  # ---- Scenario 1: Short city break, sustainability-led ----
+  - story: city break high sustainability happy path
+    steps:
+      - intent: greet
+      - action: utter_greet
+      - intent: request_recommendation
+      - action: trip_intake_form
+      - active_loop: trip_intake_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: utter_submit_intake
+      - action: action_trip_recommendation
+      - intent: thank
+      - action: utter_thank
+
+  # ---- Scenario 2: Eco-tour, then carbon check ----
+  - story: recommendation then carbon footprint query
+    steps:
+      - intent: request_recommendation
+      - action: trip_intake_form
+      - active_loop: trip_intake_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: utter_submit_intake
+      - action: action_trip_recommendation
+      - intent: ask_carbon_footprint
+      - action: action_calculate_carbon
+      - intent: goodbye
+      - action: utter_goodbye
+
+  # ---- Scenario 3: Carbon-neutral business trip escalated to human ----
+  - story: complex trip escalated to human advisor
+    steps:
+      - intent: request_recommendation
+      - action: trip_intake_form
+      - active_loop: trip_intake_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: utter_submit_intake
+      - action: action_trip_recommendation
+      - intent: request_human_advisor
+      - action: action_human_handover
+
+  # ---- Scenario 4: Direct carbon question without full intake ----
+  - story: direct carbon query
+    steps:
+      - intent: greet
+      - action: utter_greet
+      - intent: ask_carbon_footprint
+      - action: action_calculate_carbon
+
+  # ---- Scenario 5: User abandons / declines after recommendation ----
+  - story: recommendation then user declines more help
+    steps:
+      - intent: request_recommendation
+      - action: trip_intake_form
+      - active_loop: trip_intake_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: utter_submit_intake
+      - action: action_trip_recommendation
+      - intent: deny
+      - action: utter_goodbye

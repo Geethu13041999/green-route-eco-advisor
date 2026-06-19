@@ -1,0 +1,25 @@
+%% Eco-Travel Advisor - System Architecture & Integration Points (Task 3)
+%% Shows the conversation pipeline and where external services are called.
+flowchart TD
+    U([Traveller]) -->|text / quick-reply| FE["Web Frontend<br/>(REST channel)<br/>cards · buttons · alert · handover banner"]
+    FE <-->|REST :5005| CORE
+
+    subgraph RASA["Rasa Open Source"]
+        NLU["Rasa NLU<br/>DIETClassifier pipeline<br/>intents + entities"]
+        CORE["Rasa Core<br/>stories · rules · slots<br/>trip_intake_form<br/>2-stage fallback"]
+        NLU --> CORE
+    end
+
+    CORE <-->|action calls :5055| AS["Custom Action Server<br/>actions.py"]
+
+    AS -->|carbon per mode| CLIMATIQ["Climatiq API<br/>real-time CO2e"]
+    AS -->|hotels by city| AMADEUS["Amadeus Sandbox API<br/>live hotel availability"]
+    AS -->|eco hotels · transport ·<br/>activities · offsets| DB[("Curated Mock DB<br/>mock_db.json<br/>eco-certification data")]
+
+    AS -->|weighted score<br/>carbon + price + preference| RANK{{"Ranking &<br/>colour-banding"}}
+    RANK -->|green / amber / red| CORE
+
+    AS -.->|on failure| FB["Error handling +<br/>fallback messaging"]
+    FB -.-> CORE
+
+    CORE -->|complex case| HANDOVER["Human Handover<br/>full context package"]

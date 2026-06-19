@@ -1,0 +1,1330 @@
+{
+  "_comment": "Curated, realistic static database of eco-certified travel data. Primary verified source for hotels, transport, cultural experiences and carbon-offset programmes. Coordinates support real great-circle distance carbon estimates.",
+  "destinations": {
+    "Lisbon": {
+      "country": "Portugal",
+      "coordinates": {
+        "lat": 38.72,
+        "lon": -9.14
+      },
+      "public_transport_score": 8,
+      "weather": {
+        "best_months": [
+          "April",
+          "May",
+          "June",
+          "September",
+          "October"
+        ],
+        "avoid_months": [
+          "July",
+          "August"
+        ],
+        "typical_temp_c": 17,
+        "peak_season": "June to August",
+        "notes": "Warm and sunny spring/autumn are ideal. Summers can be very hot and crowded. Mild winters."
+      },
+      "hotels": [
+        {
+          "name": "Casa Verde Eco-Suites",
+          "certification": "Green Key",
+          "price_tier": "medium",
+          "price_per_night_eur": 95,
+          "carbon_per_night_kg": 6.2,
+          "features": [
+            "solar power",
+            "rainwater reuse"
+          ]
+        },
+        {
+          "name": "Tejo Sustainable Hostel",
+          "certification": "EU Ecolabel",
+          "price_tier": "low",
+          "price_per_night_eur": 40,
+          "carbon_per_night_kg": 4.1,
+          "features": [
+            "100% renewable energy",
+            "zero single-use plastic"
+          ]
+        },
+        {
+          "name": "Alfama Green Boutique",
+          "certification": "Biosphere",
+          "price_tier": "high",
+          "price_per_night_eur": 180,
+          "carbon_per_night_kg": 9.0,
+          "features": [
+            "carbon-neutral certified",
+            "EV charging"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "tram",
+          "carbon_per_km_kg": 0.035,
+          "notes": "Historic electric trams"
+        },
+        {
+          "mode": "train",
+          "carbon_per_km_kg": 0.041,
+          "notes": "Extensive regional rail"
+        },
+        {
+          "mode": "flight",
+          "carbon_per_km_kg": 0.255,
+          "notes": "High emissions - consider offset"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Community-run Fado evening",
+          "type": "local culture",
+          "supports_community": true
+        },
+        {
+          "name": "Urban organic farm tour",
+          "type": "eco",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "Atlantic Reforestation Fund",
+          "price_per_tonne_eur": 12,
+          "verified_by": "Gold Standard"
+        }
+      ]
+    },
+    "Copenhagen": {
+      "country": "Denmark",
+      "coordinates": {
+        "lat": 55.68,
+        "lon": 12.57
+      },
+      "public_transport_score": 10,
+      "weather": {
+        "best_months": [
+          "May",
+          "June",
+          "July",
+          "August"
+        ],
+        "avoid_months": [
+          "November",
+          "December",
+          "January",
+          "February"
+        ],
+        "typical_temp_c": 9,
+        "peak_season": "June to August",
+        "notes": "Warm summers ideal for cycling. Winters are cold and dark. Spring and autumn are mild and pleasant."
+      },
+      "hotels": [
+        {
+          "name": "Nordic Green Stay",
+          "certification": "Green Key",
+          "price_tier": "medium",
+          "price_per_night_eur": 130,
+          "carbon_per_night_kg": 5.0,
+          "features": [
+            "wind-powered",
+            "organic restaurant"
+          ]
+        },
+        {
+          "name": "Harbour Eco Hostel",
+          "certification": "EU Ecolabel",
+          "price_tier": "low",
+          "price_per_night_eur": 55,
+          "carbon_per_night_kg": 3.5,
+          "features": [
+            "bike rental",
+            "greywater recycling"
+          ]
+        },
+        {
+          "name": "Carbon-Neutral Design Hotel",
+          "certification": "Biosphere",
+          "price_tier": "high",
+          "price_per_night_eur": 240,
+          "carbon_per_night_kg": 4.2,
+          "features": [
+            "certified carbon neutral",
+            "geothermal heating"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "bicycle",
+          "carbon_per_km_kg": 0.0,
+          "notes": "World-class cycle network"
+        },
+        {
+          "mode": "metro",
+          "carbon_per_km_kg": 0.029,
+          "notes": "Driverless electric metro"
+        },
+        {
+          "mode": "flight",
+          "carbon_per_km_kg": 0.255,
+          "notes": "High emissions - consider offset"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Refshaleoen sustainable food market",
+          "type": "local culture",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "Nordic Wind Credits",
+          "price_per_tonne_eur": 15,
+          "verified_by": "Gold Standard"
+        }
+      ]
+    },
+    "Kyoto": {
+      "country": "Japan",
+      "coordinates": {
+        "lat": 35.01,
+        "lon": 135.77
+      },
+      "public_transport_score": 9,
+      "weather": {
+        "best_months": [
+          "March",
+          "April",
+          "October",
+          "November"
+        ],
+        "avoid_months": [
+          "July",
+          "August"
+        ],
+        "typical_temp_c": 16,
+        "peak_season": "March to April and October to November",
+        "notes": "Cherry blossom in spring and autumn leaves are peak times. Summers are hot and humid with heavy rainfall."
+      },
+      "hotels": [
+        {
+          "name": "Machiya Eco Ryokan",
+          "certification": "Green Key",
+          "price_tier": "medium",
+          "price_per_night_eur": 110,
+          "carbon_per_night_kg": 7.0,
+          "features": [
+            "traditional low-energy design",
+            "local artisans"
+          ]
+        },
+        {
+          "name": "Arashiyama Bamboo Guesthouse",
+          "certification": "EU Ecolabel",
+          "price_tier": "low",
+          "price_per_night_eur": 60,
+          "carbon_per_night_kg": 5.5,
+          "features": [
+            "plant-based meals",
+            "rainwater garden"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "train",
+          "carbon_per_km_kg": 0.041,
+          "notes": "Efficient rail incl. Shinkansen"
+        },
+        {
+          "mode": "bus",
+          "carbon_per_km_kg": 0.105,
+          "notes": "City bus network"
+        },
+        {
+          "mode": "flight",
+          "carbon_per_km_kg": 0.255,
+          "notes": "High emissions - consider offset"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Tea ceremony with local family",
+          "type": "local culture",
+          "supports_community": true
+        },
+        {
+          "name": "Community forest conservation walk",
+          "type": "eco",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "Satoyama Forest Project",
+          "price_per_tonne_eur": 18,
+          "verified_by": "Verra"
+        }
+      ]
+    },
+    "Costa Rica": {
+      "country": "Costa Rica",
+      "coordinates": {
+        "lat": 9.93,
+        "lon": -84.08
+      },
+      "public_transport_score": 6,
+      "weather": {
+        "best_months": [
+          "December",
+          "January",
+          "February",
+          "March",
+          "April"
+        ],
+        "avoid_months": [
+          "September",
+          "October"
+        ],
+        "typical_temp_c": 25,
+        "peak_season": "December to April",
+        "notes": "Dry season Dec-Apr is best for wildlife and hiking. Wet season has lush greenery but heavy rain Sep-Oct."
+      },
+      "hotels": [
+        {
+          "name": "Selva Verde Lodge",
+          "certification": "CST (Certification for Sustainable Tourism)",
+          "price_tier": "medium",
+          "price_per_night_eur": 100,
+          "carbon_per_night_kg": 8.0,
+          "features": [
+            "rainforest reserve",
+            "community employment"
+          ]
+        },
+        {
+          "name": "Pacuare Eco Camp",
+          "certification": "Rainforest Alliance",
+          "price_tier": "high",
+          "price_per_night_eur": 210,
+          "carbon_per_night_kg": 6.5,
+          "features": [
+            "off-grid solar",
+            "river conservation"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "shared shuttle",
+          "carbon_per_km_kg": 0.068,
+          "notes": "Lower-impact group transfers"
+        },
+        {
+          "mode": "domestic flight",
+          "carbon_per_km_kg": 0.255,
+          "notes": "High emissions - consider offset"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Indigenous-led rainforest tour",
+          "type": "local culture",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "Costa Rica Reforestation (FONAFIFO)",
+          "price_per_tonne_eur": 10,
+          "verified_by": "Gold Standard"
+        }
+      ]
+    },
+    "Barcelona": {
+      "country": "Spain",
+      "coordinates": {
+        "lat": 41.39,
+        "lon": 2.17
+      },
+      "public_transport_score": 9,
+      "weather": {
+        "best_months": [
+          "May",
+          "June",
+          "September",
+          "October"
+        ],
+        "avoid_months": [
+          "July",
+          "August"
+        ],
+        "typical_temp_c": 18,
+        "peak_season": "June to August",
+        "notes": "Mild spring and autumn are ideal with fewer crowds. Summers are hot and very busy. Pleasant sea breeze year-round."
+      },
+      "hotels": [
+        {
+          "name": "Mediterrani Green Hotel",
+          "certification": "Biosphere",
+          "price_tier": "medium",
+          "price_per_night_eur": 120,
+          "carbon_per_night_kg": 6.8,
+          "features": [
+            "solar thermal",
+            "local sourcing"
+          ]
+        },
+        {
+          "name": "Gracia Eco Hostel",
+          "certification": "EU Ecolabel",
+          "price_tier": "low",
+          "price_per_night_eur": 50,
+          "carbon_per_night_kg": 4.4,
+          "features": [
+            "renewable energy",
+            "water saving"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "metro",
+          "carbon_per_km_kg": 0.03,
+          "notes": "Extensive metro"
+        },
+        {
+          "mode": "train",
+          "carbon_per_km_kg": 0.041,
+          "notes": "Regional rail"
+        },
+        {
+          "mode": "flight",
+          "carbon_per_km_kg": 0.255,
+          "notes": "High emissions - consider offset"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Cooperative tapas walking tour",
+          "type": "local culture",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "Mediterranean Blue Carbon",
+          "price_per_tonne_eur": 14,
+          "verified_by": "Gold Standard"
+        }
+      ]
+    },
+    "Amsterdam": {
+      "country": "Netherlands",
+      "coordinates": {
+        "lat": 52.37,
+        "lon": 4.9
+      },
+      "public_transport_score": 10,
+      "weather": {
+        "best_months": [
+          "April",
+          "May",
+          "June",
+          "July",
+          "August"
+        ],
+        "avoid_months": [
+          "November",
+          "December",
+          "January"
+        ],
+        "typical_temp_c": 11,
+        "peak_season": "April to August",
+        "notes": "Tulip season in April is spectacular. Summers are warm and ideal for canal cycling. Winters are cold and grey."
+      },
+      "hotels": [
+        {
+          "name": "Canal Green Boutique",
+          "certification": "Green Key",
+          "price_tier": "high",
+          "price_per_night_eur": 200,
+          "carbon_per_night_kg": 5.6,
+          "features": [
+            "canal-water cooling",
+            "green roof"
+          ]
+        },
+        {
+          "name": "Jordaan Eco Stay",
+          "certification": "EU Ecolabel",
+          "price_tier": "medium",
+          "price_per_night_eur": 110,
+          "carbon_per_night_kg": 5.0,
+          "features": [
+            "bike-first",
+            "vegetarian breakfast"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "bicycle",
+          "carbon_per_km_kg": 0.0,
+          "notes": "Cycling capital"
+        },
+        {
+          "mode": "tram",
+          "carbon_per_km_kg": 0.033,
+          "notes": "Electric trams"
+        },
+        {
+          "mode": "flight",
+          "carbon_per_km_kg": 0.255,
+          "notes": "High emissions - consider offset"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Community canal clean-up and tour",
+          "type": "eco",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "Dutch Peatland Restoration",
+          "price_per_tonne_eur": 16,
+          "verified_by": "Verra"
+        }
+      ]
+    },
+    "Rome": {
+      "country": "Italy",
+      "coordinates": {
+        "lat": 41.9,
+        "lon": 12.5
+      },
+      "public_transport_score": 7,
+      "weather": {
+        "best_months": [
+          "April",
+          "May",
+          "September",
+          "October"
+        ],
+        "avoid_months": [
+          "July",
+          "August"
+        ],
+        "typical_temp_c": 16,
+        "peak_season": "June to August",
+        "notes": "Spring and autumn are ideal with mild temperatures and fewer crowds. Summers are extremely hot and very busy."
+      },
+      "hotels": [
+        {
+          "name": "Trastevere Eco Residence",
+          "certification": "Legambiente Turismo",
+          "price_tier": "medium",
+          "price_per_night_eur": 115,
+          "carbon_per_night_kg": 7.4,
+          "features": [
+            "energy efficient",
+            "zero-km food"
+          ]
+        },
+        {
+          "name": "Aurelio Green Guesthouse",
+          "certification": "EU Ecolabel",
+          "price_tier": "low",
+          "price_per_night_eur": 65,
+          "carbon_per_night_kg": 5.2,
+          "features": [
+            "solar water heating"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "metro",
+          "carbon_per_km_kg": 0.034,
+          "notes": "Metro lines A/B/C"
+        },
+        {
+          "mode": "train",
+          "carbon_per_km_kg": 0.041,
+          "notes": "Regional rail"
+        },
+        {
+          "mode": "flight",
+          "carbon_per_km_kg": 0.255,
+          "notes": "High emissions - consider offset"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Family-run Roman cooking class",
+          "type": "local culture",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "Apennines Reforestation",
+          "price_per_tonne_eur": 13,
+          "verified_by": "Gold Standard"
+        }
+      ]
+    },
+    "Reykjavik": {
+      "country": "Iceland",
+      "coordinates": {
+        "lat": 64.15,
+        "lon": -21.94
+      },
+      "public_transport_score": 7,
+      "weather": {
+        "best_months": [
+          "June",
+          "July",
+          "August"
+        ],
+        "avoid_months": [
+          "November",
+          "December",
+          "January"
+        ],
+        "typical_temp_c": 5,
+        "peak_season": "June to August",
+        "notes": "Midnight sun in summer. Winter is cold and dark but good for Northern Lights."
+      },
+      "hotels": [
+        {
+          "name": "Geothermal Eco Lodge",
+          "certification": "Nordic Swan",
+          "price_tier": "high",
+          "price_per_night_eur": 220,
+          "carbon_per_night_kg": 3.0,
+          "features": [
+            "100% geothermal energy",
+            "minimal footprint"
+          ]
+        },
+        {
+          "name": "Aurora Green Guesthouse",
+          "certification": "EarthCheck",
+          "price_tier": "medium",
+          "price_per_night_eur": 130,
+          "carbon_per_night_kg": 3.4,
+          "features": [
+            "renewable grid"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "electric bus",
+          "carbon_per_km_kg": 0.025,
+          "notes": "Geothermal-powered grid"
+        },
+        {
+          "mode": "flight",
+          "carbon_per_km_kg": 0.255,
+          "notes": "High emissions - consider offset"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Community geothermal and glacier walk",
+          "type": "eco",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "Icelandic Carbon Capture (CarbFix)",
+          "price_per_tonne_eur": 22,
+          "verified_by": "Gold Standard"
+        }
+      ]
+    },
+    "Bangkok": {
+      "country": "Thailand",
+      "coordinates": {
+        "lat": 13.76,
+        "lon": 100.5
+      },
+      "public_transport_score": 7,
+      "weather": {
+        "best_months": [
+          "November",
+          "December",
+          "January",
+          "February",
+          "March"
+        ],
+        "avoid_months": [
+          "April",
+          "May",
+          "September",
+          "October"
+        ],
+        "typical_temp_c": 29,
+        "peak_season": "November to February",
+        "notes": "Cool dry season Nov-Feb is best. Hot season Apr-May is scorching. Monsoon brings flooding risk Sep-Oct."
+      },
+      "hotels": [
+        {
+          "name": "Chao Phraya Green Hotel",
+          "certification": "Green Key",
+          "price_tier": "medium",
+          "price_per_night_eur": 75,
+          "carbon_per_night_kg": 8.5,
+          "features": [
+            "water recycling",
+            "local crafts"
+          ]
+        },
+        {
+          "name": "Riverside Eco Hostel",
+          "certification": "EarthCheck",
+          "price_tier": "low",
+          "price_per_night_eur": 30,
+          "carbon_per_night_kg": 6.0,
+          "features": [
+            "solar power",
+            "plastic-free"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "skytrain",
+          "carbon_per_km_kg": 0.04,
+          "notes": "Electric BTS Skytrain"
+        },
+        {
+          "mode": "riverboat",
+          "carbon_per_km_kg": 0.06,
+          "notes": "Public river transport"
+        },
+        {
+          "mode": "flight",
+          "carbon_per_km_kg": 0.255,
+          "notes": "High emissions - consider offset"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Community canal khlong homestay tour",
+          "type": "local culture",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "Thai Mangrove Restoration",
+          "price_per_tonne_eur": 11,
+          "verified_by": "Verra"
+        }
+      ]
+    },
+    "Bali": {
+      "country": "Indonesia",
+      "coordinates": {
+        "lat": -8.65,
+        "lon": 115.22
+      },
+      "public_transport_score": 4,
+      "weather": {
+        "best_months": [
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September"
+        ],
+        "avoid_months": [
+          "January",
+          "February",
+          "March"
+        ],
+        "typical_temp_c": 27,
+        "peak_season": "July to August",
+        "notes": "Dry season Apr-Sep is best. Avoid rainy season Jan-Mar."
+      },
+      "hotels": [
+        {
+          "name": "Ubud Jungle Eco Resort",
+          "certification": "EarthCheck",
+          "price_tier": "high",
+          "price_per_night_eur": 160,
+          "carbon_per_night_kg": 7.8,
+          "features": [
+            "permaculture farm",
+            "spring-water"
+          ]
+        },
+        {
+          "name": "Sidemen Bamboo Eco Villa",
+          "certification": "Rainforest Alliance",
+          "price_tier": "medium",
+          "price_per_night_eur": 70,
+          "carbon_per_night_kg": 6.2,
+          "features": [
+            "bamboo construction",
+            "community staff"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "electric scooter",
+          "carbon_per_km_kg": 0.02,
+          "notes": "Local e-scooter rental"
+        },
+        {
+          "mode": "shared shuttle",
+          "carbon_per_km_kg": 0.068,
+          "notes": "Group transfers"
+        },
+        {
+          "mode": "flight",
+          "carbon_per_km_kg": 0.255,
+          "notes": "High emissions - consider offset"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Subak rice-terrace community walk",
+          "type": "local culture",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "Indonesia Peatland and Mangrove",
+          "price_per_tonne_eur": 10,
+          "verified_by": "Verra"
+        }
+      ]
+    },
+    "Vienna": {
+      "country": "Austria",
+      "coordinates": {
+        "lat": 48.21,
+        "lon": 16.37
+      },
+      "public_transport_score": 10,
+      "weather": {
+        "best_months": [
+          "April",
+          "May",
+          "June",
+          "September",
+          "October"
+        ],
+        "avoid_months": [
+          "January",
+          "February"
+        ],
+        "typical_temp_c": 11,
+        "peak_season": "April to September",
+        "notes": "Warm summers and mild spring/autumn are ideal. Winter Christmas markets popular in Dec. Cold Jan-Feb with possible snow."
+      },
+      "hotels": [
+        {
+          "name": "Ringstrasse Green Hotel",
+          "certification": "Austrian Ecolabel",
+          "price_tier": "medium",
+          "price_per_night_eur": 125,
+          "carbon_per_night_kg": 5.4,
+          "features": [
+            "green electricity",
+            "organic dining"
+          ]
+        },
+        {
+          "name": "Donau Eco Hostel",
+          "certification": "EU Ecolabel",
+          "price_tier": "low",
+          "price_per_night_eur": 55,
+          "carbon_per_night_kg": 4.0,
+          "features": [
+            "district heating"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "tram",
+          "carbon_per_km_kg": 0.031,
+          "notes": "Dense tram network"
+        },
+        {
+          "mode": "metro",
+          "carbon_per_km_kg": 0.03,
+          "notes": "U-Bahn"
+        },
+        {
+          "mode": "flight",
+          "carbon_per_km_kg": 0.255,
+          "notes": "High emissions - consider offset"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Heuriger family wine-tavern evening",
+          "type": "local culture",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "Alpine Forest Carbon",
+          "price_per_tonne_eur": 15,
+          "verified_by": "Gold Standard"
+        }
+      ]
+    },
+    "Vancouver": {
+      "country": "Canada",
+      "coordinates": {
+        "lat": 49.28,
+        "lon": -123.12
+      },
+      "public_transport_score": 8,
+      "weather": {
+        "best_months": [
+          "June",
+          "July",
+          "August",
+          "September"
+        ],
+        "avoid_months": [
+          "November",
+          "December",
+          "January"
+        ],
+        "typical_temp_c": 11,
+        "peak_season": "June to September",
+        "notes": "Warm dry summers are perfect for outdoor activities. Winters are mild but very rainy. Snow is rare in the city."
+      },
+      "hotels": [
+        {
+          "name": "Pacific Green Hotel",
+          "certification": "Green Key",
+          "price_tier": "high",
+          "price_per_night_eur": 190,
+          "carbon_per_night_kg": 6.0,
+          "features": [
+            "hydro-powered",
+            "LEED certified"
+          ]
+        },
+        {
+          "name": "Gastown Eco Inn",
+          "certification": "Biosphere",
+          "price_tier": "medium",
+          "price_per_night_eur": 120,
+          "carbon_per_night_kg": 5.3,
+          "features": [
+            "local food",
+            "recycling program"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "skytrain",
+          "carbon_per_km_kg": 0.028,
+          "notes": "Electric SkyTrain"
+        },
+        {
+          "mode": "seabus",
+          "carbon_per_km_kg": 0.045,
+          "notes": "Electric ferry"
+        },
+        {
+          "mode": "flight",
+          "carbon_per_km_kg": 0.255,
+          "notes": "High emissions - consider offset"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Indigenous-led coastal heritage tour",
+          "type": "local culture",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "British Columbia Reforestation",
+          "price_per_tonne_eur": 17,
+          "verified_by": "Gold Standard"
+        }
+      ]
+    },
+    "Stockholm": {
+      "country": "Sweden",
+      "coordinates": {
+        "lat": 59.33,
+        "lon": 18.07
+      },
+      "public_transport_score": 10,
+      "weather": {
+        "best_months": [
+          "May",
+          "June",
+          "July",
+          "August"
+        ],
+        "avoid_months": [
+          "November",
+          "December",
+          "January",
+          "February"
+        ],
+        "typical_temp_c": 8,
+        "peak_season": "June to August",
+        "notes": "Long summer days with up to 18 hours of daylight. Winters are cold and dark. Spring and autumn are crisp and pleasant."
+      },
+      "hotels": [
+        {
+          "name": "Archipelago Green Hotel",
+          "certification": "Nordic Swan",
+          "price_tier": "high",
+          "price_per_night_eur": 210,
+          "carbon_per_night_kg": 4.0,
+          "features": [
+            "renewable energy",
+            "eco-spa"
+          ]
+        },
+        {
+          "name": "Sodermalm Eco Hostel",
+          "certification": "EU Ecolabel",
+          "price_tier": "low",
+          "price_per_night_eur": 60,
+          "carbon_per_night_kg": 3.6,
+          "features": [
+            "green electricity",
+            "waste sorting"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "metro",
+          "carbon_per_km_kg": 0.025,
+          "notes": "Electric metro (Tunnelbana)"
+        },
+        {
+          "mode": "ferry",
+          "carbon_per_km_kg": 0.04,
+          "notes": "City ferries"
+        },
+        {
+          "mode": "flight",
+          "carbon_per_km_kg": 0.255,
+          "notes": "High emissions - consider offset"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Community archipelago kayaking",
+          "type": "eco",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "Swedish Boreal Forest",
+          "price_per_tonne_eur": 16,
+          "verified_by": "Gold Standard"
+        }
+      ]
+    },
+    "Cape Town": {
+      "country": "South Africa",
+      "coordinates": {
+        "lat": -33.92,
+        "lon": 18.42
+      },
+      "public_transport_score": 5,
+      "weather": {
+        "best_months": [
+          "October",
+          "November",
+          "December",
+          "January",
+          "February",
+          "March"
+        ],
+        "avoid_months": [
+          "June",
+          "July",
+          "August"
+        ],
+        "typical_temp_c": 17,
+        "peak_season": "December to February",
+        "notes": "Southern hemisphere summer Dec-Feb is warm and sunny. Winter Jun-Aug is cold and rainy."
+      },
+      "hotels": [
+        {
+          "name": "Table Mountain Eco Lodge",
+          "certification": "Fair Trade Tourism",
+          "price_tier": "high",
+          "price_per_night_eur": 150,
+          "carbon_per_night_kg": 7.2,
+          "features": [
+            "solar and wind",
+            "water-wise"
+          ]
+        },
+        {
+          "name": "Woodstock Green Guesthouse",
+          "certification": "Heritage Environmental",
+          "price_tier": "medium",
+          "price_per_night_eur": 80,
+          "carbon_per_night_kg": 6.4,
+          "features": [
+            "greywater reuse",
+            "local employment"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "MyCiTi bus",
+          "carbon_per_km_kg": 0.07,
+          "notes": "Bus rapid transit"
+        },
+        {
+          "mode": "shared shuttle",
+          "carbon_per_km_kg": 0.068,
+          "notes": "Group transfers"
+        },
+        {
+          "mode": "flight",
+          "carbon_per_km_kg": 0.255,
+          "notes": "High emissions - consider offset"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Township social-enterprise food tour",
+          "type": "local culture",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "South African Restoration Spekboom",
+          "price_per_tonne_eur": 9,
+          "verified_by": "Verra"
+        }
+      ]
+    },
+    "Kerala": {
+      "country": "India",
+      "coordinates": {
+        "lat": 10.85,
+        "lon": 76.27
+      },
+      "public_transport_score": 7,
+      "weather": {
+        "best_months": [
+          "October",
+          "November",
+          "December",
+          "January",
+          "February"
+        ],
+        "avoid_months": [
+          "June",
+          "July",
+          "August"
+        ],
+        "typical_temp_c": 28,
+        "peak_season": "December to February",
+        "notes": "Tropical climate. Monsoon season Jun-Aug — avoid for outdoor activities."
+      },
+      "hotels": [
+        {
+          "name": "Coconut Lagoon",
+          "certification": "Green Key",
+          "price_tier": "high",
+          "price_per_night_eur": 180,
+          "carbon_per_night_kg": 6.5,
+          "features": [
+            "solar power",
+            "houseboat access",
+            "organic farm"
+          ]
+        },
+        {
+          "name": "Spice Village",
+          "certification": "Rainforest Alliance",
+          "price_tier": "medium",
+          "price_per_night_eur": 110,
+          "carbon_per_night_kg": 5.8,
+          "features": [
+            "spice garden",
+            "community staff",
+            "tribal walks"
+          ]
+        },
+        {
+          "name": "Philipkutty's Farm",
+          "certification": "EarthCheck",
+          "price_tier": "medium",
+          "price_per_night_eur": 90,
+          "carbon_per_night_kg": 5.0,
+          "features": [
+            "island farmstay",
+            "organic produce",
+            "canoe transport"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "houseboat",
+          "carbon_per_km_kg": 0.05,
+          "notes": "Solar houseboats on backwaters"
+        },
+        {
+          "mode": "train",
+          "carbon_per_km_kg": 0.041,
+          "notes": "Coastal rail network"
+        },
+        {
+          "mode": "auto-rickshaw",
+          "carbon_per_km_kg": 0.09,
+          "notes": "Local CNG autos"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Kathakali performance",
+          "type": "local culture",
+          "supports_community": true
+        },
+        {
+          "name": "Ayurveda wellness retreat",
+          "type": "eco",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "Kerala Reforestation Fund",
+          "price_per_tonne_eur": 10,
+          "verified_by": "Gold Standard"
+        }
+      ]
+    },
+    "New Zealand": {
+      "country": "New Zealand",
+      "coordinates": {
+        "lat": -41.29,
+        "lon": 174.78
+      },
+      "public_transport_score": 6,
+      "weather": {
+        "best_months": [
+          "December",
+          "January",
+          "February",
+          "March"
+        ],
+        "avoid_months": [
+          "June",
+          "July"
+        ],
+        "typical_temp_c": 15,
+        "peak_season": "December to February",
+        "notes": "Southern hemisphere — summer is Dec-Feb. South Island winters can be harsh."
+      },
+      "hotels": [
+        {
+          "name": "Hapuku Lodge",
+          "certification": "Qualmark Enviro Gold",
+          "price_tier": "high",
+          "price_per_night_eur": 250,
+          "carbon_per_night_kg": 5.5,
+          "features": [
+            "treetop suites",
+            "native deer farm",
+            "solar power"
+          ]
+        },
+        {
+          "name": "Earthsong Eco Lodge",
+          "certification": "EarthCheck",
+          "price_tier": "medium",
+          "price_per_night_eur": 120,
+          "carbon_per_night_kg": 4.8,
+          "features": [
+            "permaculture gardens",
+            "rainwater harvesting"
+          ]
+        },
+        {
+          "name": "Maruia River Retreat",
+          "certification": "Green Key",
+          "price_tier": "medium",
+          "price_per_night_eur": 140,
+          "carbon_per_night_kg": 5.0,
+          "features": [
+            "riverfront",
+            "native bird sanctuary",
+            "off-grid solar"
+          ]
+        }
+      ],
+      "transport_options": [
+        {
+          "mode": "TranzAlpine train",
+          "carbon_per_km_kg": 0.041,
+          "notes": "Scenic cross-island rail"
+        },
+        {
+          "mode": "electric vehicle",
+          "carbon_per_km_kg": 0.02,
+          "notes": "EV rental widely available"
+        },
+        {
+          "mode": "ferry",
+          "carbon_per_km_kg": 0.05,
+          "notes": "Interislander ferry between islands"
+        }
+      ],
+      "cultural_experiences": [
+        {
+          "name": "Maori cultural experience Te Papa",
+          "type": "local culture",
+          "supports_community": true
+        },
+        {
+          "name": "DOC conservation volunteer day",
+          "type": "eco",
+          "supports_community": true
+        }
+      ],
+      "offset_programmes": [
+        {
+          "name": "NZ Native Forest Restoration",
+          "price_per_tonne_eur": 18,
+          "verified_by": "Gold Standard"
+        }
+      ]
+    }
+  }
+}
