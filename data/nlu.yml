@@ -308,20 +308,10 @@ nlu:
     - green holiday advice
     - what is sustainable tourism
     - how can I travel responsibly
-    - i need to plan a sustainable trip
-    - help me plan a sustainable trip
-    - i want to travel sustainably
-    - plan a trip for me
-    - i want to go somewhere eco-friendly
-    - i want to plan a green trip
-    - help me travel sustainably
     - i need travel advice
-    - i want to plan an eco trip
-    - sustainable trip planning
-    - how do I plan a sustainable trip
-    - I want to make my trip eco-friendly
-    - where should I go for an eco trip
-    - plan an eco-friendly holiday for me
+    - give me advice on responsible tourism
+    - how do I lower my travel emissions
+    - tips to reduce my carbon while travelling
     - I want to travel green
 
 - intent: bot_challenge
@@ -331,4 +321,112 @@ nlu:
     - am I talking to a bot
     - are you real
     - who are you
-    - what are you  
+    - what are you
+
+- intent: thank
+  examples: |
+    - thanks
+    - thank you
+    - thanks a lot
+    - thank you so much
+    - many thanks
+    - much appreciated
+    - cheers
+    - that's helpful, thanks
+    - appreciate it
+    - thanks for the help
+
+- intent: request_recommendation
+  examples: |
+    - plan a sustainable trip for me
+    - help me plan a sustainable trip
+    - i need to plan a sustainable trip
+    - i want to plan an eco trip
+    - i want to plan a green trip
+    - plan a trip for me
+    - plan an eco-friendly holiday for me
+    - recommend an eco-friendly destination
+    - suggest a sustainable holiday
+    - where should I go for an eco trip
+    - i want to go somewhere eco-friendly
+    - can you recommend a green destination
+    - help me find a sustainable place to travel
+    - I want a trip recommendation
+    - sustainable trip planning
+    - how do I plan a sustainable trip
+    - I want to make my trip eco-friendly
+    - give me a sustainable travel recommendation
+
+- intent: provide_trip_details
+  examples: |
+    - I'm travelling from [London](origin) to [Bali](destination)
+    - from [Berlin](origin) to [Lisbon](destination)
+    - my origin is [Paris](origin)
+    - I'm flying from [Amsterdam](origin)
+    - going to [Reykjavik](destination)
+    - my destination is [Kyoto](destination)
+    - my budget is [low](budget)
+    - I have a [medium](budget) budget
+    - [high](budget) budget
+    - sustainability is [high](sustainability_level) priority
+    - sustainability level [medium](sustainability_level)
+    - it's [low](sustainability_level) priority for me
+    - travelling [12-18 August](travel_dates)
+    - dates are [next month](travel_dates)
+    - from [Madrid](origin) to [Costa Rica](destination) with a [high](budget) budget
+
+- intent: request_human_advisor
+  examples: |
+    - I want to talk to a human
+    - connect me to a human advisor
+    - can I speak to a person
+    - I'd like to talk to a real travel agent
+    - human agent please
+    - transfer me to a human
+    - I need a human advisor
+    - let me speak to someone
+    - can you put me through to a person
+    - I want to talk to a travel specialist
+
+- intent: book_flight
+  examples: |
+    - book a flight
+    - I want to book a flight
+    - book me a flight to [Bali](destination)
+    - find me a flight to [Reykjavik](destination)
+    - book a flight from [London](origin) to [Lisbon](destination)
+    - I need to book a flight to [Kyoto](destination)
+    - get me a flight to [Costa Rica](destination)
+    - reserve a flight to [Barcelona](destination)
+    - flight booking to [Amsterdam](destination)
+    - can you book a flight from [Berlin](origin) to [Rome](destination)
+
+- intent: eco_question
+  examples: |
+    - is rail better than flying
+    - how do carbon offsets work
+    - what is greenwashing
+    - are electric cars actually greener
+    - is it better to take the train or fly
+    - how can I reduce my flight emissions
+    - what makes a hotel eco-certified
+    - are cruise ships bad for the environment
+    - how much does flying contribute to climate change
+    - what is the most sustainable way to travel
+    - do carbon offsets really help
+    - is slow travel more sustainable
+    - what does carbon neutral mean
+    - how green is electric rail
+
+- intent: out_of_scope
+  examples: |
+    - what's the stock price of Tesla
+    - tell me a joke
+    - what is 2 + 2
+    - order me a pizza
+    - what's the meaning of life
+    - play some music
+    - who won the football match
+    - what's the latest news
+    - set an alarm for 7am
+    - can you write me a poem

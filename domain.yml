@@ -21,6 +21,12 @@ intents:
   - eco_question
   - out_of_scope
   - ask_weather
+  - ask_destination
+  - ask_hotels
+  - ask_cultural
+  - ask_transport
+  - ask_offset
+  - ask_eco_tips
 
 entities:
   - destination
@@ -109,13 +115,13 @@ responses:
     - text: "Which destination are you considering?"
       buttons:
         - title: "Kerala"
-          payload: '/provide_trip_details{{"destination":"Kerala"}}'
+          payload: '/provide_trip_details{"destination":"Kerala"}'
         - title: "Bali"
-          payload: '/provide_trip_details{{"destination":"Bali"}}'
+          payload: '/provide_trip_details{"destination":"Bali"}'
         - title: "Iceland"
-          payload: '/provide_trip_details{{"destination":"Reykjavik"}}'
+          payload: '/provide_trip_details{"destination":"Reykjavik"}'
         - title: "New Zealand"
-          payload: '/provide_trip_details{{"destination":"New Zealand"}}'
+          payload: '/provide_trip_details{"destination":"New Zealand"}'
 
   utter_ask_origin:
     - text: "Which city will you be travelling from? (this lets me calculate real carbon and find flights)"
@@ -127,21 +133,21 @@ responses:
     - text: "Roughly what is your budget for this trip?"
       buttons:
         - title: "Budget (low)"
-          payload: '/provide_trip_details{{"budget":"low"}}'
+          payload: '/provide_trip_details{"budget":"low"}'
         - title: "Mid-range"
-          payload: '/provide_trip_details{{"budget":"medium"}}'
+          payload: '/provide_trip_details{"budget":"medium"}'
         - title: "Premium"
-          payload: '/provide_trip_details{{"budget":"high"}}'
+          payload: '/provide_trip_details{"budget":"high"}'
 
   utter_ask_sustainability_level:
     - text: "How important is sustainability for this trip? This helps me weight my recommendations."
       buttons:
         - title: "Very important"
-          payload: '/provide_trip_details{{"sustainability_level":"high"}}'
+          payload: '/provide_trip_details{"sustainability_level":"high"}'
         - title: "Somewhat"
-          payload: '/provide_trip_details{{"sustainability_level":"medium"}}'
+          payload: '/provide_trip_details{"sustainability_level":"medium"}'
         - title: "Not a priority"
-          payload: '/provide_trip_details{{"sustainability_level":"low"}}'
+          payload: '/provide_trip_details{"sustainability_level":"low"}'
 
   utter_submit_intake:
     - text: "Great - I have everything I need. Let me find sustainable options for you."
@@ -176,7 +182,6 @@ actions:
 forms:
   trip_intake_form:
     required_slots:
-      - destination
       - origin
       - travel_dates
       - budget
@@ -184,4 +189,4 @@ forms:
 
 session_config:
   session_expiration_time: 60
-  carry_over_slots_to_new_session: true
+  carry_over_slots_to_new_session: false

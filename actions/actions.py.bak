@@ -4,7 +4,7 @@ Responsibilities implemented here:
   * action_calculate_carbon   -> queries the Climatiq API for real-time carbon
                                  emission calculations per transport mode, with a
                                  mock-database fallback when no key / API failure.
-  * action_trip_recommendation -> fetches hotels (Amadeus sandbox API when keys are
+  * action_trip_recommendation-> fetches hotels (Amadeus sandbox API when keys are
                                  present, otherwise curated mock DB), ranks them with
                                  a WEIGHTED SCORING FUNCTION combining carbon impact,
                                  price and the user's stated sustainability preference,
@@ -30,7 +30,7 @@ from rasa_sdk import Action, FormValidationAction, Tracker
 from rasa_sdk.events import SlotSet, FollowupAction
 from rasa_sdk.executor import CollectingDispatcher
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(_name_)
 
 # ---------------------------------------------------------------------------
 # Configuration & helpers
@@ -53,7 +53,7 @@ ADVISOR_SYSTEM_PROMPT = (
     "explain you can connect the traveller to a human travel specialist."
 )
 
-DB_PATH = Path(__file__).parent.parent / "data" / "mock_db.json"
+DB_PATH = Path(_file_).parent.parent / "data" / "mock_db.json"
 
 FALLBACK_EMISSION_FACTORS = {
     "flight": 0.255,
@@ -437,7 +437,7 @@ class ActionCalculateCarbon(Action):
             text=(
                 f"{emoji} Estimated carbon footprint for the {route} journey "
                 f"(~{int(distance_km)} km) by {transport_mode}: "
-                f"**{round(co2e,1)} kg CO2e** ({band.upper()} impact). "
+                f"*{round(co2e,1)} kg CO2e* ({band.upper()} impact). "
                 f"Source: {source}.\n\n"
                 "Tip: switching to rail or offsetting via a Gold Standard programme "
                 "can substantially reduce this."
@@ -518,7 +518,7 @@ class ActionTripRecommendation(Action):
             "type": "hotel_cards", "destination": destination,
             "cards": cards, "transport": transport, "activities": activities})
 
-        lines = [f"Here are the top sustainable stays in **{destination}**, "
+        lines = [f"Here are the top sustainable stays in *{destination}*, "
                  f"ranked for your '{pref}' sustainability priority:"]
 
         tp_hotels = fetch_tp_hotels(destination)
@@ -553,53 +553,6 @@ class ActionTripRecommendation(Action):
 
         dispatcher.utter_message(text="\n".join(lines))
         return [SlotSet("destination", destination)]
-
-
-# ---------------------------------------------------------------------------
-# Flight booking
-# ---------------------------------------------------------------------------
-class ActionBookFlight(Action):
-    def name(self) -> Text:
-        return "action_book_flight"
-
-    def run(self, dispatcher, tracker, domain) -> List[Dict[Text, Any]]:
-        destination = _resolve_destination(tracker)
-        origin = _get_entity(tracker, "origin") or tracker.get_slot("origin")
-
-        if not destination:
-            dispatcher.utter_message(text="Which destination would you like to fly to?")
-            return []
-        if not origin:
-            dispatcher.utter_message(text="Which city will you be flying from?")
-            return []
-
-        travel_dates = tracker.get_slot("travel_dates")
-        flight = fetch_live_flights(origin, destination, travel_dates) or fetch_tp_flight(origin, destination)
-        booking_url = flight_booking_url(origin, destination)
-
-        if flight:
-            price = flight.get("price")
-            currency = flight.get("currency", "EUR")
-            carrier = flight.get("carrier") or flight.get("airline", "n/a")
-            depart = flight.get("date") or flight.get("depart", "n/a")
-            dispatcher.utter_message(json_message={
-                "type": "flight_card", "origin": origin, "destination": destination,
-                "price": price, "currency": currency, "carrier": carrier,
-                "depart": depart, "booking_url": booking_url})
-            dispatcher.utter_message(text=(
-                f"✈️ Found a flight {origin} -> {destination} from {currency}{price} "
-                f"({carrier}, dep {depart}). [Book here]({booking_url})\n\n"
-                "Tip: check the carbon footprint for this route, or compare it against rail."))
-        else:
-            dispatcher.utter_message(json_message={
-                "type": "flight_card", "origin": origin, "destination": destination,
-                "price": None, "currency": None, "carrier": None,
-                "depart": None, "booking_url": booking_url})
-            dispatcher.utter_message(text=(
-                f"I couldn't fetch live pricing for {origin} -> {destination} right now, "
-                f"but you can search and book here: {booking_url}\n\n"
-                "Tip: for shorter distances, rail is usually the lower-carbon choice."))
-        return [SlotSet("destination", destination), SlotSet("origin", origin)]
 
 
 # ---------------------------------------------------------------------------
@@ -650,19 +603,19 @@ class ActionHumanHandover(Action):
 
 
 # ---------------------------------------------------------------------------
-# Ask destination — detects entity and routes straight to the intake form
+# Ask destination — FIXED: detects entity and routes to recommendation directly
 # ---------------------------------------------------------------------------
 class ActionAskDestination(Action):
     def name(self) -> Text:
         return "action_ask_destination"
 
     def run(self, dispatcher, tracker, domain) -> List[Dict[Text, Any]]:
-        # If destination entity already in the message, skip the picker and start the form
+        # If destination entity already in the message, go straight to recommendation
         destination = _get_entity(tracker, "destination")
         if destination:
             return [
                 SlotSet("destination", destination),
-                FollowupAction("trip_intake_form"),
+                FollowupAction("action_trip_recommendation"),
             ]
 
         # No entity — prompt user to pick a destination
@@ -703,6 +656,59 @@ class ActionLLMAdvisor(Action):
                 "eco-certified hotels and low-carbon transport. Could you rephrase, "
                 "or would you like me to connect you to a human advisor?"))
         return []
+
+
+# ---------------------------------------------------------------------------
+# Book flight — surfaces a booking link (+ live price when available) and
+# nudges toward lower-carbon rail alternatives. No payment is taken; the bot
+# hands off to an external booking site / human specialist as per the brief.
+# ---------------------------------------------------------------------------
+class ActionBookFlight(Action):
+    def name(self) -> Text:
+        return "action_book_flight"
+
+    def run(self, dispatcher, tracker, domain) -> List[Dict[Text, Any]]:
+        destination = _resolve_destination(tracker)
+        origin = _get_entity(tracker, "origin") or tracker.get_slot("origin")
+
+        if not destination:
+            dispatcher.utter_message(
+                text="Sure — which destination would you like to fly to?"
+            )
+            return []
+
+        booking_url = flight_booking_url(origin, destination)
+        live = fetch_tp_flight(origin, destination) if origin else None
+
+        dispatcher.utter_message(json_message={
+            "type": "flight_booking", "origin": origin, "destination": destination,
+            "price": (live or {}).get("price"),
+            "currency": (live or {}).get("currency", "EUR"),
+            "airline": (live or {}).get("airline"),
+            "depart": (live or {}).get("depart"),
+            "booking_url": booking_url,
+        })
+
+        route = f"{origin} → {destination}" if origin else f"to {destination}"
+        if live and live.get("price"):
+            price_line = (f" Cheapest fare I can see right now is about "
+                          f"EUR{live['price']} ({live.get('airline', 'n/a')}, "
+                          f"dep {live.get('depart', 'n/a')}).")
+        else:
+            price_line = ""
+
+        dispatcher.utter_message(text=(
+            f"✈️ I can help you book a flight {route}.{price_line}\n\n"
+            f"You can complete the booking securely here: {booking_url}\n\n"
+            "🌱 A quick eco-note: flights are the most carbon-intensive option. "
+            "Where the route allows, rail is far lower-carbon, and I can suggest a "
+            "Gold Standard offset for any flight you do take. Want me to estimate "
+            "this flight's carbon footprint, or connect you to a human travel "
+            "specialist to finalise the booking?"
+        ))
+        return [SlotSet("destination", destination)] + (
+            [SlotSet("origin", origin)] if origin else []
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -756,27 +762,27 @@ class ActionGetWeather(Action):
         seasonal = dest_data.get("weather", {})
         live = self._get_live_weather(destination)
 
-        lines = [f"**Weather for {destination}**\n"]
+        lines = [f"*Weather for {destination}*\n"]
         if live:
             lines.append(
-                f"**Right now:** {live['description']}, {live['temp_c']}°C "
+                f"*Right now:* {live['description']}, {live['temp_c']}°C "
                 f"(feels like {live['feels_like']}°C)\n"
                 f"💧 Humidity: {live['humidity']}%  |  💨 Wind: {live['wind_kph']} km/h"
             )
         else:
             avg = seasonal.get("typical_temp_c", "N/A")
-            lines.append(f"**Typical temperature:** ~{avg}°C")
+            lines.append(f"*Typical temperature:* ~{avg}°C")
 
         if seasonal:
             best = ", ".join(seasonal.get("best_months", []))
             avoid = ", ".join(seasonal.get("avoid_months", []))
             peak = seasonal.get("peak_season", "")
             note = seasonal.get("notes", "")
-            lines.append(f"\n📅 **Best time to visit:** {best}")
+            lines.append(f"\n📅 *Best time to visit:* {best}")
             if avoid:
-                lines.append(f"⚠️ **Avoid:** {avoid} (unfavourable weather)")
+                lines.append(f"⚠️ *Avoid:* {avoid} (unfavourable weather)")
             if peak:
-                lines.append(f"🏆 **Peak season:** {peak}")
+                lines.append(f"🏆 *Peak season:* {peak}")
             if note:
                 lines.append(f"\n💡 {note}")
         else:

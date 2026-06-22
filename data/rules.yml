@@ -41,10 +41,14 @@ rules:
       - intent: book_flight
       - action: action_book_flight
 
-  # ---- Trip intake form activation / submission ----
-  - rule: Activate trip intake form
+  - rule: Show destination options on request
     steps:
       - intent: request_recommendation
+      - action: action_ask_destination
+
+  - rule: Activate form after destination selected
+    steps:
+      - intent: provide_trip_details
       - action: trip_intake_form
       - active_loop: trip_intake_form
 
@@ -59,7 +63,6 @@ rules:
       - action: utter_submit_intake
       - action: action_trip_recommendation
 
-  # ---- Two-stage fallback (Task 4 requirement) ----
   - rule: Default fallback on low NLU confidence
     steps:
       - intent: nlu_fallback
@@ -99,8 +102,3 @@ rules:
     steps:
       - intent: ask_eco_tips
       - action: action_ask_destination
-
-  - rule: Handle provide trip details
-    steps:
-      - intent: provide_trip_details
-      - action: action_trip_recommendation
